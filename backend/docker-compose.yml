@@ -1,0 +1,16 @@
+services:
+  cinebase_db:
+    image: postgres:15
+    container_name: cinebase_postgres_container
+    environment:
+      POSTGRES_DB: cinebase_multiuser_app
+      POSTGRES_USER: cinebase_user
+      POSTGRES_PASSWORD: cinebase_password
+    ports:
+      - "5435:5432"
+    volumes:
+      - cinebase_postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  cinebase_postgres_data:
