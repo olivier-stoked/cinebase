@@ -8,32 +8,36 @@ import jakarta.persistence.*;
 public class AppUser {
 
     @Id
-    // Autoincrement
+    // Primary key und autoincrement
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     // ! Optimistic Locking (verhindert, dass sich 2 Admins gegenseitig überschreiben)
-    // Unerlässlich für Multi-User Anwendung
+    // Unerlässlich für Multi-User Anwendung. Das Problem des Lost Update wird hier behoben.
+    // Das Versionsfeld schützt vor Datenverlust. "Last commit wins".
     @Version
     private Long version;
 
     // Feld muss gefüllt sein (Pflichtfeld).
-    // keine zwei User mit demselben Namen
+    // Keine zwei User mit demselben Namen.
     @Column(nullable = false, unique = true, length = 50)
     private String username;
 
-    // oder derseORDINAL: Speichert die Zahl (0). Schlecht, wenn man später die Reihenfolge im Enum ändert.lben E-Mail.
+    // oder derselben E-Mail.
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
     @Column(nullable = false)
     private String password;
 
-    // EnumType.STRING speichert den Namen (z.B. "ADMIN").
+    // EnumType.STRING speichert den Namen (z.B. "ADMIN") in der Datenbank.
     // ! Der Standard (ORDINAL) würde nur die Zahl speichern (0, 1, ...), (KI Info)
     // was zu falschen Berechtigungen führt, wenn man später neue Rollen einfügt.
+    // Daher STRING statt ORDINAL.
+    // @Enumerated: der Übersetzer - nimmt Namen aus dem Enum und schreibt ihn als Text in die DB-Tabelle.
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    // Dieses Feld muss einer der Werte (ADMIN, USER) aus der Role KLasse sein.
     private Role role;
 
     // Leerer Konstruktor (obligatorisch für JPA)
