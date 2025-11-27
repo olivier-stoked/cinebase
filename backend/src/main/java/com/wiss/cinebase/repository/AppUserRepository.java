@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-// ! BRAUCHT GESAMTE CODE ERKLÄRUNGEN - schwache Erklärungen !!!!!!!!!!!!!!!!!!!!
+// ! Ist mir immer noch nicht 100% schlüssig.
 // * Interface: sobald die App launcht liest Spring die Methodennamen.
 // * Es muss in AppUser gefunden werden, wo die diversen Felder übereinstimmen.
 // * Spring baut den SQL-Code zur Laufzeit automatisch zusammen.

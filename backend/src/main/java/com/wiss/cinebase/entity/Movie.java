@@ -6,6 +6,10 @@ import jakarta.persistence.*;
 @Table(name = "movies")
 public class Movie {
 
+
+    // ! Movie steht und ist mit User verknüpft. !!!!!
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,11 +35,17 @@ public class Movie {
 
     // ! Multi-User Erweiterung
     // Kardinalität: Viele Filme (Many) gehören zu einem User (One).
-    // ! fetch = FetchType.LAZY: Performance Schalter.
-    // * EAGER
+    // ! fetch = FetchType.LAZY: Performance Schalter - Java lädt nur die Filmdaten und lässt den User (das Feld
+    // ! createdby) frei. Erst wenn die Funktion .getCreatedBy() aufgerufen wird, lädt Java die Daten. Vorteil: ressourcenarm,
+    // ! weniger Befehle, die App läuft schneller, der Server hat weniger zu tun, die Website lädt schneller.
+    // * Gegenteil EAGER: bei EAGER würde Java beim Laden eines Films eine zweite DB-Abfrage starten, um den User zu laden (Film Details).
     // FetchType.LAZY: Der User wird erst geladen, wenn er explizit angefragt wird.
     @ManyToOne(fetch = FetchType.LAZY)
-    // ! Verbindung innerhalb der DB
+
+    // ! Verbindung innerhalb der DB. In der Tabelle "movies" wird die Spalte created_by_user_id angelegt. Die kreierte Zahl
+    // ! ist der Foreign Key (der auf die id-Spalte der Tabelle "app_users" zeigt)
+    // Verknüpfung in der DB-Tabelle ist sauber benannt. SQL ist tabellenartig und enthält keine Objekte. User wird via ID mit dem Film
+    // verbunden. Erleichtert die DB-Struktur und die SQL-Inspektion der DB via DBeaver/Postman.
     @JoinColumn(name = "created_by_user_id")
     private AppUser createdBy;
 

@@ -11,13 +11,10 @@ public class SwaggerConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
-        return new OpenAPI()
-                .info(new Info()
-                        .title("Quiz Backend API")
-                        .version("1.0.0")
-                        .description("REST API für Quiz-Anwendung mit CRUD-Operationen für Fragen")
-                        .contact(new Contact()
-                                .name("WISS Quiz Team")
-                                .email("quiz@wiss.ch")));
+        return new OpenAPI().info(new Info().title("CINEBASE API")
+                .version("1.0.0")
+                .description("REST API für die CINEBASE Filmdatenbank.")
+                .contact(new Contact().name("Cinebase Dev Team")
+                        .email("dev@cinebase.ch")));
     }
 }

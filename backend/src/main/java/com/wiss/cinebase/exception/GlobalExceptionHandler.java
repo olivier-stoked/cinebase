@@ -15,96 +15,7 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(QuestionNotFoundException.class)
-    public ResponseEntity<ErrorResponseDTO> handleQuestionNotFound(
-            QuestionNotFoundException ex, WebRequest request){
-
-        ErrorResponseDTO error = new ErrorResponseDTO(
-                "QUESTION_NOT_FOUND",
-                "Frage mit ID " + ex.getQuestionId() + " wurde nicht gefunden",
-                404,
-                extractPath(request)
-        );
-
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(InvalidQuestionDataException.class)
-    public ResponseEntity<ErrorResponseDTO> handleInvalidQuestionData(
-            InvalidQuestionDataException ex, WebRequest request){
-
-        ErrorResponseDTO error = new ErrorResponseDTO(
-                "INVALID_QUESTION_DATA",
-                ex.getMessage(),
-                400,
-                extractPath(request)
-        );
-
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(CategoryNotFoundException.class)
-    public ResponseEntity<ErrorResponseDTO> handleCategoryNotFound(
-            CategoryNotFoundException ex, WebRequest request) {
-
-        ErrorResponseDTO error = new ErrorResponseDTO(
-                "INVALID_CATEGORY",
-                "Kategorie '" + ex.getCategory() + "' ist nicht gültig. " +
-                        "Verfügbare Kategorien: sports, games, movies, geography, science, history",
-                400,
-                extractPath(request)
-        );
-
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(DifficultyNotFoundException.class)
-    public ResponseEntity<ErrorResponseDTO> handleDifficultyNotFound(
-            DifficultyNotFoundException ex, WebRequest request) {
-
-        ErrorResponseDTO error = new ErrorResponseDTO(
-                "INVALID_DIFFICULTY",
-                "Schwierigkeitsgrad '" + ex.getDiffculty() + "' ist nicht gültig. " +
-                        "Verfügbare Schwierigkietsgrade: easy, medium, hard",
-                400,
-                extractPath(request)
-        );
-
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponseDTO> handleIllegalArgument(
-            IllegalArgumentException ex, WebRequest request) {
-
-        ErrorResponseDTO error = new ErrorResponseDTO(
-                "INVALID_INPUT",
-                ex.getMessage(),
-                400,
-                extractPath(request)
-        );
-
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponseDTO> handleGeneralException(
-            Exception ex, WebRequest request) {
-
-        // Log the actual exception for debugging (nicht an Frontend senden!)
-        System.err.println("Unhandled exception: " + ex.getMessage());
-        ex.printStackTrace();
-
-        ErrorResponseDTO error = new ErrorResponseDTO(
-                "INTERNAL_SERVER_ERROR",
-                "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
-                500,
-                extractPath(request)
-        );
-
-        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
+    // Behandelt Validierungsfehler (@Valid im Controller)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDTO> handleValidationErrors(
             MethodArgumentNotValidException ex, WebRequest request) {
@@ -119,21 +30,35 @@ public class GlobalExceptionHandler {
         StringBuilder message = new StringBuilder("Validierungsfehler: ");
         errors.forEach((field, error) -> message.append(field).append(" - ").append(error).append("; "));
 
-        ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO(
+        ErrorResponseDTO errorResponse = new ErrorResponseDTO(
                 "VALIDATION_ERROR",
                 message.toString(),
                 400,
                 extractPath(request)
         );
-        return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    /**
-     * Extrahiert den API-Pfad aus dem WebRequest.
-     * @param request
-     * @return
-     */
-    private String extractPath(WebRequest request){
+    // Fallback für alle anderen unerwarteten Fehler
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponseDTO> handleGeneralException(
+            Exception ex, WebRequest request) {
+
+        // Loggen für Debugging (auf der Konsole)
+        System.err.println("Unhandled exception: " + ex.getMessage());
+        ex.printStackTrace();
+
+        ErrorResponseDTO error = new ErrorResponseDTO(
+                "INTERNAL_SERVER_ERROR",
+                "Ein unerwarteter Fehler ist aufgetreten.",
+                500,
+                extractPath(request)
+        );
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private String extractPath(WebRequest request) {
         return request.getDescription(false).replace("uri=", "");
     }
 }
