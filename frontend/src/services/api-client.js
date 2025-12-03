@@ -1,5 +1,6 @@
 import axios from "axios";
 
+// Verbindung zur API
 // Adresse Spring Boot Backend
 const API_BASE_URL = "http://localhost:8080/api";
 

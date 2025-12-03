@@ -5,6 +5,12 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+
+// ! Enthält die Validierung: Block 6A
+// Annotationen wie @NotBlank und @Min, um Regeln festzulegen.
+
+
+
 // DB-Entity Movie wird in ein DTO "verpackt" - das DTO für die Film-Daten
 // DTO dient als Schutzschicht vor der Datenbank-Entity: Verbindung zwischen Movie und AppUser (inkl. Passwort)
 // ! BESSERES VERSTÄNDNIS: Wenn JSON Daten direkt versendet werden, könnte das Passwort enthalten sein.
