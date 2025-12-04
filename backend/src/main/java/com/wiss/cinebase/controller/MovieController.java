@@ -1,20 +1,15 @@
-
-
-
-
-
-
-
-
 package com.wiss.cinebase.controller;
 
 import com.wiss.cinebase.dto.MovieDTO;
 import com.wiss.cinebase.service.MovieService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,7 +26,7 @@ import java.util.List;
 
     @Tag(name = "Movies", description = "Verwaltung der Filme (CRUD)")
 
-    // Der "Koch" der App
+    // Der "Kellner" der App
     // Security: ADMIN dürfen schreiben, USER nur lesen
     // Dokumentation: Swagger/OpenAPI - jeder Endpoint wird beschrieben, sodass er im Browser getestet werden kann
     public class MovieController {
