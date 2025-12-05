@@ -42,7 +42,7 @@ const LoginForm = ({ onLogin, isLoading }) => {
             return;
         }
 
-        // 2. Daten an die Eltern-Komponente (Login.jsx) geben
+        // 2. Daten an die Eltern-Komponente (Login.jsx) weitergeben
         onLogin(usernameOrEmail, password);
     };
 
@@ -52,7 +52,7 @@ const LoginForm = ({ onLogin, isLoading }) => {
             <div style={{ marginBottom: "1rem" }}>
                 <label
                     htmlFor="username"
-                    style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#666" }}
+                    style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#ccc" }}
                 >
                     Benutzername oder E-Mail
                 </label>
@@ -72,7 +72,7 @@ const LoginForm = ({ onLogin, isLoading }) => {
             <div style={{ marginBottom: "1.5rem" }}>
                 <label
                     htmlFor="password"
-                    style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#666" }}
+                    style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#ccc" }}
                 >
                     Passwort
                 </label>

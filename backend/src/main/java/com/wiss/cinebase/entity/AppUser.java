@@ -1,11 +1,18 @@
 package com.wiss.cinebase.entity;
 
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
 
 // Java-Klasse als ein Objekt markiert.
 @Entity
 @Table(name = "app_users")
-public class AppUser {
+// WICHTIG: Interface implementieren!
+public class AppUser implements UserDetails {
 
     @Id
     // Primary key und autoincrement
@@ -36,9 +43,11 @@ public class AppUser {
     // Daher STRING statt ORDINAL.
     // @Enumerated: der Übersetzer - nimmt Namen aus dem Enum und schreibt ihn als Text in die DB-Tabelle.
     @Enumerated(EnumType.STRING)
+
     @Column(nullable = false)
     // Dieses Feld muss einer der Werte (ADMIN, USER) aus der Role KLasse sein.
     private Role role;
+
 
     // Leerer Konstruktor (obligatorisch für JPA)
     public AppUser() {
@@ -51,6 +60,47 @@ public class AppUser {
         this.password = password;
         this.role = role;
     }
+
+
+    // ! UserDetails Methoden - unabdingbar für Spring Security
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // Wandelt Role (ADMIN) in eine Spring Authority (ROLE_ADMIN) um
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
+
 
     // Getter und Setter
 
@@ -70,10 +120,6 @@ public class AppUser {
         this.version = version;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
     public void setUsername(String username) {
         this.username = username;
     }
@@ -84,10 +130,6 @@ public class AppUser {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
     }
 
     public void setPassword(String password) {
