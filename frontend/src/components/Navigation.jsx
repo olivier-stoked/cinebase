@@ -17,6 +17,7 @@ const Navigation = () => {
             <div style={{ display: "flex", gap: "20px" }}>
                 <Link to="/" style={{ color: "white", textDecoration: "none", fontWeight: "bold" }}>CINEBASE</Link>
                 <Link to="/" style={{ color: "#ccc", textDecoration: "none" }}>Home</Link>
+                <Link to="/movies">Filme</Link>
                 {!isAuthenticated && (
                     <Link to="/login" style={{ color: "#ccc", textDecoration: "none" }}>Login</Link>
                 )}
