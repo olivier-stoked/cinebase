@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Movies from "./pages/Movies"; // ← NEU: Import für die Film-Seite
 import ProtectedRoute from "./components/protected-route"; // ← NEU: Import für den Schutz
 import Forbidden from "./pages/Forbidden"; // Forbidden Import
+import MovieManager from "./pages/MovieManager";
 
 function App() {
     return (
@@ -21,6 +22,19 @@ function App() {
                 <Route path="login" element={<Login />} />
                 {/* NEU: Forbidden Route */}
                 <Route path="forbidden" element={<Forbidden />} />
+
+                {/* Admin Route: Filme verwalten */}
+                {/* Quelle: Block 04B - Protected Routes */}
+                <Route
+                    path="admin"
+                    element={
+                        <ProtectedRoute requiredRole="ADMIN">
+                            <MovieManager />
+                        </ProtectedRoute>
+                    }
+                />
+
+
 
                 {/* Geschützte Route: Filme anzeigen (Für alle eingeloggten User) */}
                 <Route

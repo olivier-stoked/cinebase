@@ -18,6 +18,12 @@ const Navigation = () => {
                 <Link to="/" style={{ color: "white", textDecoration: "none", fontWeight: "bold" }}>CINEBASE</Link>
                 <Link to="/" style={{ color: "#ccc", textDecoration: "none" }}>Home</Link>
                 <Link to="/movies">Filme</Link>
+
+                {/* Admin Link nur fuer ADMIN Rolle anzeigen */}
+                {user?.role === "ADMIN" && (
+                    <Link to="/admin" style={{ color: "#ff4444", textDecoration: "none" }}>Admin</Link>
+                )}
+
                 {!isAuthenticated && (
                     <Link to="/login" style={{ color: "#ccc", textDecoration: "none" }}>Login</Link>
                 )}
