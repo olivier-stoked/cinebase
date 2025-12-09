@@ -14,7 +14,7 @@ export const getAllMovies = async () => {
 };
 
 // Quelle: Block 04B - CRUD Operations
-// Wir benoetigen diese Methode, um die Details fuer das Bearbeiten zu laden (optional)
+// Wir benötigen diese Methode, um die Details für das Bearbeiten zu laden (optional)
 export const getMovieById = async (id) => {
     try {
         const response = await apiClient.get(`/movies/${id}`);
@@ -52,7 +52,7 @@ export const deleteMovie = async (id) => {
     try {
         await apiClient.delete(`/movies/${id}`);
     } catch (error) {
-        console.error(`Fehler beim Loeschen von Film ${id}:`, error);
+        console.error(`Fehler beim Löschen von Film ${id}:`, error);
         throw error;
     }
 };

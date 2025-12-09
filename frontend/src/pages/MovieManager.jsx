@@ -78,10 +78,10 @@ const MovieManager = () => {
         setEditingMovie(null);
     };
 
-    // Handler: Film loeschen
+    // Handler: Film löschen
     // Quelle: Block 04B - Delete Operation
     const handleDelete = async (id) => {
-        if(!window.confirm("Diesen Film wirklich loeschen?")) return;
+        if(!window.confirm("Diesen Film wirklich löschen?")) return;
 
         try {
             await deleteMovie(id);
@@ -93,8 +93,8 @@ const MovieManager = () => {
                 setEditingMovie(null);
             }
         } catch (err) {
-            console.error("Fehler beim Loeschen:", err);
-            alert("Fehler beim Loeschen.");
+            console.error("Fehler beim Löschen:", err);
+            alert("Fehler beim Löschen.");
         }
     };
 
@@ -160,7 +160,7 @@ const MovieManager = () => {
                                 onClick={() => handleDelete(movie.id)}
                                 style={{ background: "#dc3545", color: "white", padding: "0.5rem 1rem" }}
                             >
-                                Loeschen
+                                Löschen
                             </button>
                         </div>
                     </div>
