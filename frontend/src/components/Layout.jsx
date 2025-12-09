@@ -3,10 +3,17 @@ import Navigation from "./Navigation";
 
 const Layout = () => {
     return (
-        <div>
+        <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
             <Navigation />
-            <main style={{ padding: "0 2rem", maxWidth: "1200px", margin: "0 auto" }}>
-                {/* Hier werden die Child-Routes (Home, Login, etc.) gerendert */}
+
+            {/* WICHTIG: maxWidth + margin: "0 auto" sorgt für die Zentrierung */}
+            <main style={{
+                padding: "2rem",
+                maxWidth: "1200px",
+                margin: "0 auto",
+                width: "100%",
+                boxSizing: "border-box"
+            }}>
                 <Outlet />
             </main>
         </div>

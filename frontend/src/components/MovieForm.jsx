@@ -58,7 +58,7 @@ const MovieForm = ({ onSubmit, initialData, onCancel }) => {
 
     return (
         <div className="auth-container" style={{ maxWidth: "600px", marginBottom: "2rem" }}>
-            <h3>{initialData ? "Film bearbeiten" : "Neuen Film hinzufuegen"}</h3>
+            <h3>{initialData ? "Film bearbeiten" : "Neuen Film hinzufügen"}</h3>
 
             <form onSubmit={handleSubmit}>
 
