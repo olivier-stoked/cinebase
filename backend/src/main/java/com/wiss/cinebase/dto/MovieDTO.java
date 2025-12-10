@@ -40,12 +40,30 @@ public class MovieDTO {
     @Max(value = 10, message = "Rating darf maximal 10 sein")
     private double rating;
 
+
+
+
+
+
+    // --- NEU HINZUGEFÜGT ---
+    // Dynamischer Durchschnitt der User-Reviews (wird live berechnet)
+
+// ! Damit der Admin auch sieht, wie gut ein Film ankommt, müssen wir die Durchschnittsnote in das DTO im Backend
+// ! aufnehmen. Wir fügen das Feld averageRating hinzu, damit wir den Wert transportieren können.
+
+
+
+    private Double averageRating;
+    // -----------------------
+
     // Konstruktoren
 
     public MovieDTO() {
     }
 
     // ! Warum dieser leere Konstruktor ???
+    // Antwort: Frameworks wie Jackson (für JSON) brauchen ihn, um eine leere Instanz zu erzeugen,
+    // bevor sie die Daten über Setter einfüllen. Ohne ihn gibt es Fehler beim Deserialisieren.
     public MovieDTO(Long id, String title, String description, String genre, int releaseYear, String director, double rating) {
         this.id = id;
         this.title = title;
@@ -54,6 +72,8 @@ public class MovieDTO {
         this.releaseYear = releaseYear;
         this.director = director;
         this.rating = rating;
+        // Neu: Standardwert setzen
+        this.averageRating = 0.0;
     }
 
     // Getter und Setter
@@ -112,5 +132,13 @@ public class MovieDTO {
     public void setRating(double rating) {
         this.rating = rating;
     }
-}
 
+    // --- NEUE GETTER & SETTER ---
+    public Double getAverageRating() {
+        return averageRating;
+    }
+
+    public void setAverageRating(Double averageRating) {
+        this.averageRating = averageRating;
+    }
+}

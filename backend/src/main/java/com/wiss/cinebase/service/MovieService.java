@@ -14,12 +14,14 @@ import com.wiss.cinebase.exception.MovieNotFoundException;
 import com.wiss.cinebase.mapper.MovieMapper;
 import com.wiss.cinebase.repository.AppUserRepository;
 import com.wiss.cinebase.repository.MovieRepository;
+import com.wiss.cinebase.repository.ReviewRepository; // ! NEU: Import für Durchschnittsberechnung
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // Spring relevanter Import!
 
 import java.util.List;
+import java.util.stream.Collectors; // ! NEU: Für die Listen-Verarbeitung
 
 /**
  * Service für die Verwaltung von Filmen.
@@ -34,11 +36,15 @@ import java.util.List;
 public class MovieService {
     private final MovieRepository movieRepository;
     private final AppUserRepository appUserRepository;
+    private final ReviewRepository reviewRepository; // ! NEU: Injizieren des Review Repositories
 
     // Konstruktor-Injektion (best practice in diesem Fall) statt @Autowired - bessere Testbarkeit
-    public MovieService(MovieRepository movieRepository, AppUserRepository appUserRepository) {
+    public MovieService(MovieRepository movieRepository,
+                        AppUserRepository appUserRepository,
+                        ReviewRepository reviewRepository) { // ! NEU: Parameter hinzugefügt
         this.movieRepository = movieRepository;
         this.appUserRepository = appUserRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     /**
@@ -49,8 +55,6 @@ public class MovieService {
      * @return Der gespeicherte Film als DTO (inklusive generierter ID)
      * @throws UsernameNotFoundException wenn der eingeloggte User nicht in der DB gefunden wird (Sicherheits-Edge-Case)
      */
-
-
     public MovieDTO createMovie(MovieDTO movieDTO) {
 
         // Neue Filmerstellung und Verknüpfung mit eingeloggtem Admin
@@ -89,10 +93,24 @@ public class MovieService {
     // ! Optimierung für Lesezugriff
     /** Ruft eine Liste aller verfügbaren Filme ab. */
 
+    // ! Der Service muss jetzt beim Laden aller Filme (getAllMovies) kurz beim ReviewRepository nachfragen:
+    // ! "Wie ist der Durchschnitt für diesen Film?".
+
     @Transactional(readOnly = true) // ! Performance: readOnly optimiert die Datenbankabfrage
     public List<MovieDTO> getAllMovies() {
-        List<Movie> movies = movieRepository.findAll();
-        return MovieMapper.toDTOList(movies);
+        // ! ANPASSUNG: Wir nutzen Streams, um für jeden Film den Durchschnitt zu berechnen
+        return movieRepository.findAll().stream()
+                .map(movie -> {
+                    // 1. Entity zu DTO umwandeln
+                    MovieDTO dto = MovieMapper.toDTO(movie);
+
+                    // 2. ! NEU: Live-Durchschnitt aus der Review-Tabelle holen (Custom Query Block 05B)
+                    Double avg = reviewRepository.getAverageRatingForMovie(movie.getId());
+                    dto.setAverageRating(avg != null ? avg : 0.0);
+
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
     /**
@@ -107,7 +125,13 @@ public class MovieService {
         Movie movie = movieRepository.findById(id)
                 .orElseThrow(() -> new MovieNotFoundException(id));
 
-        return MovieMapper.toDTO(movie);
+        MovieDTO dto = MovieMapper.toDTO(movie);
+
+        // ! NEU: Auch beim Einzelabruf den Durchschnitt setzen
+        Double avg = reviewRepository.getAverageRatingForMovie(movie.getId());
+        dto.setAverageRating(avg != null ? avg : 0.0);
+
+        return dto;
     }
 
     // Aktualisierung eines Films
@@ -115,20 +139,20 @@ public class MovieService {
         Movie existingMovie = movieRepository.findById(id)
                 .orElseThrow(() -> new MovieNotFoundException(id));
 
-    // Felderaktualisierung
-    existingMovie.setTitle(movieDTO.getTitle());
-    existingMovie.setDescription(movieDTO.getDescription());
-    existingMovie.setGenre(movieDTO.getGenre());
-    existingMovie.setReleaseYear(movieDTO.getReleaseYear());
-    existingMovie.setDirector(movieDTO.getDirector());
-    existingMovie.setRating(movieDTO.getRating());
+        // Felderaktualisierung
+        existingMovie.setTitle(movieDTO.getTitle());
+        existingMovie.setDescription(movieDTO.getDescription());
+        existingMovie.setGenre(movieDTO.getGenre());
+        existingMovie.setReleaseYear(movieDTO.getReleaseYear());
+        existingMovie.setDirector(movieDTO.getDirector());
+        existingMovie.setRating(movieDTO.getRating());
 
-    // ! JPA Magic: Durch @Transactional würde die Änderung auch ohne save() erkannt ("Dirty Checking"). KI !!!!
-    // Wir rufen save() trotzdem explizit auf, um den Code verständlicher zu machen.
-    // Abspeichern (trotzdem erkennt JPA Änderung automatisch via @Transactional) - better safe than sorry
-    Movie updatedMovie = movieRepository.save(existingMovie);
-    return MovieMapper.toDTO(updatedMovie);
-}
+        // ! JPA Magic: Durch @Transactional würde die Änderung auch ohne save() erkannt ("Dirty Checking"). KI !!!!
+        // Wir rufen save() trotzdem explizit auf, um den Code verständlicher zu machen.
+        // Abspeichern (trotzdem erkennt JPA Änderung automatisch via @Transactional) - better safe than sorry
+        Movie updatedMovie = movieRepository.save(existingMovie);
+        return MovieMapper.toDTO(updatedMovie);
+    }
 
     /**
      * Löscht einen Film unwiderruflich aus der Datenbank.
@@ -137,12 +161,12 @@ public class MovieService {
      */
 
     public void deleteMovie(Long id) {
-    // ! Wir prüfen vorher, ob er existiert, um eine saubere Exception zu werfen
-    if (!movieRepository.existsById(id)) {
-        throw new MovieNotFoundException(id);
-    }
+        // ! Wir prüfen vorher, ob er existiert, um eine saubere Exception zu werfen
+        if (!movieRepository.existsById(id)) {
+            throw new MovieNotFoundException(id);
+        }
 
-    movieRepository.deleteById(id);
+        movieRepository.deleteById(id);
 
     }
 

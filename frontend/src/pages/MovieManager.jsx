@@ -129,22 +129,28 @@ const MovieManager = () => {
 
             <div style={{ display: "grid", gap: "1rem" }}>
                 {movies.map(movie => (
-                    <div key={movie.id} style={{
+                    // ! ANPASSUNG: Dark Mode (className="card") & User Rating Anzeige
+                    <div key={movie.id} className="card" style={{
                         display: "flex",
                         justifyContent: "space-between",
-                        alignItems: "center",
-                        padding: "1rem",
-                        background: "white",
-                        borderRadius: "8px",
-                        border: "1px solid #eee"
+                        alignItems: "center"
+                        // WICHTIG: background: "white" entfernt fuer Dark Mode!
                     }}>
                         <div style={{ flex: 1 }}>
-                            {/* Titel explizit dunkel gefaerbt, damit er auf weissem Grund sichtbar ist */}
-                            <div style={{ fontSize: "1.1rem", fontWeight: "bold", color: "#333" }}>
-                                {movie.title} <span style={{ color: "#888", fontWeight: "normal" }}>({movie.releaseYear})</span>
+                            {/* Titel ohne festes 'black', damit er im Darkmode weiss ist
+                            Design-Fix: Die fest codierten Farben (background: "white", color: "#333") entfernt und
+                             durch die CSS-Klasse className="card" ersetzt. Damit passt es jetzt zum Dark Mode.*/}
+                            <div style={{ fontSize: "1.1rem", fontWeight: "bold" }}>
+                                {movie.title} <span style={{ color: "#aaa", fontWeight: "normal" }}>({movie.releaseYear})</span>
                             </div>
-                            <div style={{ fontSize: "0.9rem", color: "#666", marginTop: "0.25rem" }}>
-                                Regie: {movie.director} | Genre: {movie.genre} | Rating: {movie.rating}
+                            <div style={{ fontSize: "0.9rem", color: "#aaa", marginTop: "0.25rem" }}>
+                                Regie: {movie.director} | Genre: {movie.genre} | Admin-Rating: {movie.rating}
+                            </div>
+
+                            {/* User-Rating (Durchschnitt) für den Admin sichtbar machen. Feature: Die Anzeige des
+                             User-Ratings (Durchschnitt) hinzugefügt, damit der Admin sieht, wie der Film ankommt. */}
+                            <div style={{ marginTop: "8px", fontSize: "0.9rem", color: "#FFD700", fontWeight: "bold" }}>
+                                ★ User-Rating: {movie.averageRating ? movie.averageRating.toFixed(1) : "0.0"} / 10
                             </div>
                         </div>
 
