@@ -73,13 +73,6 @@ const Login = () => {
                         Noch keinen Account? <span style={{ color: "#666" }}>(Registrierung folgt)</span>
                     </p>
                 </div>
-
-                {/* ! Hilfreiche Info für Testzwecke (kann später weg) */}
-                <div style={{ marginTop: "20px", fontSize: "0.8rem", color: "#666", background: "#f0f0f0", padding: "10px", borderRadius: "4px" }}>
-                    <strong>Test-Login:</strong><br/>
-                    User: <code>admin</code><br/>
-                    Pass: <code>admin123</code>
-                </div>
             </div>
         </div>
     );

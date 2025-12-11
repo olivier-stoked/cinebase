@@ -1,14 +1,14 @@
 package com.wiss.cinebase.entity;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List; // WICHTIG: Import für die Liste
 
 @Entity
 @Table(name = "movies")
 public class Movie {
 
-
     // ! Movie steht und ist mit User verknüpft. !!!!!
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,6 +49,13 @@ public class Movie {
     @JoinColumn(name = "created_by_user_id")
     private AppUser createdBy;
 
+    // --- NEU (FIX FÜR DAS LÖSCHEN) ---
+    // Hier definieren wir, dass ein Film viele Reviews hat.
+    // cascade = CascadeType.ALL: Löscht man den Film, werden automatisch alle Reviews mitgelöscht.
+    // orphanRemoval = true: Entfernt man ein Review aus der Liste, verschwindet es auch aus der DB.
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews = new ArrayList<>();
+    // ---------------------------------
 
     // Leerer Konstruktor (Pflicht für JPA).
     public Movie() {
@@ -128,5 +135,14 @@ public class Movie {
 
     public void setCreatedBy(AppUser createdBy) {
         this.createdBy = createdBy;
+    }
+
+    // --- NEUE GETTER/SETTER FÜR REVIEWS ---
+    public List<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(List<Review> reviews) {
+        this.reviews = reviews;
     }
 }

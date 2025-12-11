@@ -2,35 +2,29 @@ package com.wiss.cinebase.dto;
 
 import java.time.LocalDateTime;
 
+/**
+ * Standard-Struktur für Fehlermeldungen an das Frontend.
+ * Statt wirren Stacktraces schicken wir dieses saubere JSON-Objekt.
+ */
 public class ErrorResponseDTO {
-
-    private String error;
-    private String message;
-    private int status;
+    private String errorCode; // z.B. "NOT_FOUND"
+    private String message;   // z.B. "Film mit ID 5 nicht gefunden"
+    private int status;       // z.B. 404
+    private String path;      // z.B. "/api/movies/5"
     private LocalDateTime timestamp;
-    private String path;
 
-    public ErrorResponseDTO(String error, String message, int status, String path){
-        this.error = error;
+    public ErrorResponseDTO(String errorCode, String message, int status, String path) {
+        this.errorCode = errorCode;
         this.message = message;
         this.status = status;
         this.path = path;
         this.timestamp = LocalDateTime.now();
     }
 
-    // Getter und Setter
-    public String getError() { return error; }
-    public void setError(String error) { this.error = error; }
-
+    // Getter
+    public String getErrorCode() { return errorCode; }
     public String getMessage() { return message; }
-    public void setMessage(String message) { this.message = message; }
-
     public int getStatus() { return status; }
-    public void setStatus(int status) { this.status = status; }
-
-    public LocalDateTime getTimestamp() { return timestamp; }
-    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
-
     public String getPath() { return path; }
-    public void setPath(String path) { this.path = path; }
+    public LocalDateTime getTimestamp() { return timestamp; }
 }

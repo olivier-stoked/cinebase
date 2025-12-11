@@ -5,7 +5,8 @@ import { useState } from "react";
  * Wird direkt in der MovieCard angezeigt.
  */
 const ReviewForm = ({ movieId, onReviewSubmit, onCancel }) => {
-    const [rating, setRating] = useState(5);
+    // Standard auf 10 (Exzellent) oder 5 (Durchschnitt) setzen
+    const [rating, setRating] = useState(10);
     const [comment, setComment] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
@@ -19,7 +20,7 @@ const ReviewForm = ({ movieId, onReviewSubmit, onCancel }) => {
             // Daten vorbereiten für das Backend (DTO Struktur)
             const reviewData = {
                 movieId: movieId,
-                rating: parseInt(rating),
+                rating: parseInt(rating), // WICHTIG: Integer erzwingen
                 comment: comment
             };
 
@@ -27,10 +28,10 @@ const ReviewForm = ({ movieId, onReviewSubmit, onCancel }) => {
             await onReviewSubmit(reviewData);
 
             // Formular zurücksetzen
-            setRating(5);
+            setRating(10);
             setComment("");
         } catch (err) {
-            // Fehlermeldung vom Backend anzeigen (z.B. "Bereits bewertet")
+            // Fehlermeldung vom Backend anzeigen
             setError(err.response?.data?.error || "Fehler beim Bewerten.");
         } finally {
             setIsSubmitting(false);
@@ -38,30 +39,41 @@ const ReviewForm = ({ movieId, onReviewSubmit, onCancel }) => {
     };
 
     return (
-        <div style={{ marginTop: "1rem", padding: "1rem", background: "#f9f9f9", borderRadius: "8px", border: "1px solid #eee" }}>
-            <h4 style={{ margin: "0 0 10px 0", color: "#333" }}>Film bewerten</h4>
+        // Style angepasst für Dark Mode (Dunkelgrau #333 statt Weiß #f9f9f9)
+        <div style={{ marginTop: "1rem", padding: "1rem", background: "#333", borderRadius: "8px", border: "1px solid #444" }}>
+            <h4 style={{ margin: "0 0 10px 0", color: "#fff" }}>Film bewerten</h4>
 
             <form onSubmit={handleSubmit}>
-                {/* Rating Auswahl 1-10 */}
+                {/* Rating Auswahl 0-10 (Dropdown für klare Zuordnung) */}
                 <div style={{ marginBottom: "10px" }}>
-                    <label style={{ display: "block", marginBottom: "5px", color: "#666", fontSize: "0.9rem" }}>
-                        Punkte (1-10):
+                    <label style={{ display: "block", marginBottom: "5px", color: "#ccc", fontSize: "0.9rem" }}>
+                        Punktevergabe:
                     </label>
                     <select
                         className="form-input"
                         value={rating}
                         onChange={(e) => setRating(e.target.value)}
                         disabled={isSubmitting}
+                        style={{ background: "#444", color: "white", border: "1px solid #555" }} // Dark Input
                     >
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
-                            <option key={num} value={num}>{num}</option>
-                        ))}
+                        {/* Harmonisierte Skala: 1 Punkt = 1/2 Stern */}
+                        <option value="10">10 Punkte (⭐⭐⭐⭐⭐ Exzellent)</option>
+                        <option value="9"> 9 Punkte (⭐⭐⭐⭐½ Herausragend)</option>
+                        <option value="8"> 8 Punkte (⭐⭐⭐⭐ Sehr gut)</option>
+                        <option value="7"> 7 Punkte (⭐⭐⭐½ Gut)</option>
+                        <option value="6"> 6 Punkte (⭐⭐⭐ Befriedigend)</option>
+                        <option value="5"> 5 Punkte (⭐⭐½ Durchschnitt)</option>
+                        <option value="4"> 4 Punkte (⭐⭐ Unterdurchschnittlich)</option>
+                        <option value="3"> 3 Punkte (⭐½ Schlecht)</option>
+                        <option value="2"> 2 Punkte (⭐ Sehr schlecht)</option>
+                        <option value="1"> 1 Punkt  (½ Furchtbar)</option>
+                        <option value="0"> 0 Punkte (Müll)</option>
                     </select>
                 </div>
 
                 {/* Kommentar Feld */}
                 <div style={{ marginBottom: "10px" }}>
-                    <label style={{ display: "block", marginBottom: "5px", color: "#666", fontSize: "0.9rem" }}>
+                    <label style={{ display: "block", marginBottom: "5px", color: "#ccc", fontSize: "0.9rem" }}>
                         Kommentar (optional):
                     </label>
                     <textarea
@@ -72,18 +84,19 @@ const ReviewForm = ({ movieId, onReviewSubmit, onCancel }) => {
                         rows="2"
                         maxLength="500"
                         disabled={isSubmitting}
+                        style={{ background: "#444", color: "white", border: "1px solid #555" }} // Dark Input
                     />
                 </div>
 
                 {/* Error Anzeige */}
-                {error && <div style={{ color: "red", fontSize: "0.9rem", marginBottom: "10px" }}>{error}</div>}
+                {error && <div style={{ color: "#ff6b6b", fontSize: "0.9rem", marginBottom: "10px" }}>{error}</div>}
 
                 {/* Buttons */}
                 <div style={{ display: "flex", gap: "10px" }}>
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        style={{ flex: 1, background: "#28a745" }}
+                        style={{ flex: 1, background: "#28a745", color: "white", border: "none", padding: "8px", cursor: "pointer" }}
                     >
                         {isSubmitting ? "Sende..." : "Speichern"}
                     </button>
@@ -91,7 +104,7 @@ const ReviewForm = ({ movieId, onReviewSubmit, onCancel }) => {
                         type="button"
                         onClick={onCancel}
                         disabled={isSubmitting}
-                        style={{ background: "#6c757d" }}
+                        style={{ background: "#6c757d", color: "white", border: "none", padding: "8px", cursor: "pointer" }}
                     >
                         Abbrechen
                     </button>

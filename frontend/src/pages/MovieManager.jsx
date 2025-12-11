@@ -42,21 +42,13 @@ const MovieManager = () => {
         try {
             if (editingMovie) {
                 // --- UPDATE FALL ---
-                // Wir rufen PUT auf dem Backend auf
                 const updated = await updateMovie(editingMovie.id, movieData);
-
-                // Lokalen State aktualisieren: Alten Film durch neuen ersetzen
                 setMovies(movies.map(m => m.id === editingMovie.id ? updated : m));
-
-                // Edit-Modus beenden
                 setEditingMovie(null);
                 alert("Film erfolgreich aktualisiert!");
             } else {
                 // --- CREATE FALL ---
-                // Wir rufen POST auf dem Backend auf
                 const created = await createMovie(movieData);
-
-                // Lokalen State aktualisieren: Neuen Film anhaengen
                 setMovies([...movies, created]);
                 alert("Film erfolgreich erstellt!");
             }
@@ -66,29 +58,21 @@ const MovieManager = () => {
         }
     };
 
-    // Handler: Klick auf "Bearbeiten"
     const handleEditClick = (movie) => {
         setEditingMovie(movie);
-        // Nach oben scrollen fuer bessere UX
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // Handler: Klick auf "Abbrechen"
     const handleCancelEdit = () => {
         setEditingMovie(null);
     };
 
-    // Handler: Film löschen
-    // Quelle: Block 04B - Delete Operation
     const handleDelete = async (id) => {
         if(!window.confirm("Diesen Film wirklich löschen?")) return;
 
         try {
             await deleteMovie(id);
-            // Aus lokaler Liste entfernen
             setMovies(movies.filter(m => m.id !== id));
-
-            // Falls wir den Film gerade bearbeiten, Edit-Modus beenden
             if (editingMovie?.id === id) {
                 setEditingMovie(null);
             }
@@ -110,12 +94,6 @@ const MovieManager = () => {
                 </div>
             )}
 
-            {/* WICHTIG: Key-Prop Pattern
-         Wir nutzen 'key', um die Komponente neu zu rendern, wenn sich der Modus aendert.
-         - 'create': Leeres Formular
-         - editingMovie.id: Vorausgefuelltes Formular
-         Dies vermeidet Probleme mit veraltetem State im Formular.
-      */}
             <MovieForm
                 key={editingMovie ? editingMovie.id : 'create'}
                 onSubmit={handleFormSubmit}
@@ -129,29 +107,38 @@ const MovieManager = () => {
 
             <div style={{ display: "grid", gap: "1rem" }}>
                 {movies.map(movie => (
-                    // ! ANPASSUNG: Dark Mode (className="card") & User Rating Anzeige
+                    // ! ANPASSUNG: Dark Mode (className="card")
                     <div key={movie.id} className="card" style={{
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center"
-                        // WICHTIG: background: "white" entfernt fuer Dark Mode!
                     }}>
                         <div style={{ flex: 1 }}>
-                            {/* Titel ohne festes 'black', damit er im Darkmode weiss ist
-                            Design-Fix: Die fest codierten Farben (background: "white", color: "#333") entfernt und
-                             durch die CSS-Klasse className="card" ersetzt. Damit passt es jetzt zum Dark Mode.*/}
+                            {/* Titel */}
                             <div style={{ fontSize: "1.1rem", fontWeight: "bold" }}>
                                 {movie.title} <span style={{ color: "#aaa", fontWeight: "normal" }}>({movie.releaseYear})</span>
                             </div>
+
+                            {/* Metadata (Regie, Genre) */}
                             <div style={{ fontSize: "0.9rem", color: "#aaa", marginTop: "0.25rem" }}>
-                                Regie: {movie.director} | Genre: {movie.genre} | Admin-Rating: {movie.rating}
+                                Regie: {movie.director} | Genre: {movie.genre}
                             </div>
 
-                            {/* User-Rating (Durchschnitt) für den Admin sichtbar machen. Feature: Die Anzeige des
-                             User-Ratings (Durchschnitt) hinzugefügt, damit der Admin sieht, wie der Film ankommt. */}
-                            <div style={{ marginTop: "8px", fontSize: "0.9rem", color: "#FFD700", fontWeight: "bold" }}>
-                                ★ User-Rating: {movie.averageRating ? movie.averageRating.toFixed(1) : "0.0"} / 10
+                            {/* --- NEU: Entflochtene Bewertung (Jury vs. Publikum) --- */}
+                            <div style={{ display: "flex", gap: "15px", marginTop: "8px", fontSize: "0.9rem" }}>
+
+                                {/* 1. Jury Wert */}
+                                <span style={{ color: "#888" }}>
+                                   ⚖️ Jury-Rating: <strong>{movie.rating}</strong>
+                                </span>
+
+                                {/* 2. Community Wert */}
+                                <span style={{ color: "#FFD700", fontWeight: "bold" }}>
+                                   ★ Publikum: {movie.averageRating ? movie.averageRating.toFixed(1) : "-"}
+                                </span>
+
                             </div>
+                            {/* ------------------------------------------------------- */}
                         </div>
 
                         <div style={{ display: "flex", gap: "10px" }}>

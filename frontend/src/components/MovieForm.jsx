@@ -21,9 +21,6 @@ const DEFAULT_DATA = {
 const MovieForm = ({ onSubmit, initialData, onCancel }) => {
 
     // Quelle: React Basics - State Initialisierung
-    // Wir initialisieren den State direkt. Wenn initialData vorhanden ist (Edit Mode),
-    // nutzen wir diese Daten. Sonst die Defaults.
-    // Durch den 'key'-Prop im Parent wird diese Komponente neu erstellt, wenn sich der Film aendert.
     const [formData, setFormData] = useState(initialData || DEFAULT_DATA);
     const [errors, setErrors] = useState({});
 
@@ -36,7 +33,6 @@ const MovieForm = ({ onSubmit, initialData, onCancel }) => {
     };
 
     // Quelle: Block 03B - Validation Logic
-    // Wir validieren vor dem Absenden. Fehler werden im State gespeichert.
     const validate = () => {
         const newErrors = {};
         if (!formData.title.trim()) newErrors.title = "Titel ist erforderlich";
@@ -51,7 +47,6 @@ const MovieForm = ({ onSubmit, initialData, onCancel }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validate()) {
-            // Daten an Parent (MovieManager) geben
             onSubmit(formData);
         }
     };
@@ -71,8 +66,8 @@ const MovieForm = ({ onSubmit, initialData, onCancel }) => {
                         value={formData.title}
                         onChange={handleChange}
                         placeholder="Titel des Films"
+                        required
                     />
-                    {/* Quelle: Block 03B - Fehleranzeige */}
                     {errors.title && <span className="error-message">{errors.title}</span>}
                 </div>
 
@@ -85,6 +80,7 @@ const MovieForm = ({ onSubmit, initialData, onCancel }) => {
                             name="director"
                             value={formData.director}
                             onChange={handleChange}
+                            required
                         />
                         {errors.director && <span className="error-message">{errors.director}</span>}
                     </div>
@@ -96,53 +92,65 @@ const MovieForm = ({ onSubmit, initialData, onCancel }) => {
                             value={formData.genre}
                             onChange={handleChange}
                             placeholder="z.B. Sci-Fi"
+                            required
                         />
                         {errors.genre && <span className="error-message">{errors.genre}</span>}
                     </div>
                 </div>
 
-                {/* Jahr & Rating */}
+                {/* Jahr & Rating (Jury Score) */}
                 <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
                     <div style={{ flex: 1 }}>
-                        <label>Jahr</label>
+                        <label>Jahr *</label>
                         <input
                             className="form-input"
                             type="number"
                             name="releaseYear"
                             value={formData.releaseYear}
                             onChange={handleChange}
+                            required
                         />
                         {errors.releaseYear && <span className="error-message">{errors.releaseYear}</span>}
                     </div>
+
+                    {/* --- ANPASSUNG: Jury Label & Hinweis --- */}
                     <div style={{ flex: 1 }}>
-                        <label>Rating (0-10)</label>
+                        <label>Jury-Wertung (Festival-Leitung) *</label>
                         <input
                             className="form-input"
                             type="number"
-                            step="0.1"
+                            step="1"
+                            min="0"
+                            max="10"
                             name="rating"
+                            placeholder="z.B. 8.5"
                             value={formData.rating}
                             onChange={handleChange}
+                            required
                         />
+                        <small style={{ color: "#aaa", fontSize: "0.8rem", marginTop: "5px", display: "block" }}>
+                            Offizielle Bewertung der Festival-Jury.
+                        </small>
                     </div>
                 </div>
 
                 {/* Beschreibung */}
                 <div style={{ marginBottom: "1rem" }}>
-                    <label>Beschreibung</label>
+                    <label>Beschreibung *</label>
                     <textarea
                         className="form-input"
                         name="description"
                         value={formData.description || ""}
                         onChange={handleChange}
                         rows="3"
+                        required
                     />
                 </div>
 
                 {/* Buttons */}
                 <div style={{ display: "flex", gap: "10px" }}>
                     <button type="submit" style={{ flex: 1 }}>
-                        {initialData ? "Aenderungen speichern" : "Film speichern"}
+                        {initialData ? "Änderungen speichern" : "Film speichern"}
                     </button>
 
                     {/* Abbrechen Button nur anzeigen wenn wir editieren */}
