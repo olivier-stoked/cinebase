@@ -1,10 +1,12 @@
 package com.wiss.cinebase.exception;
 
-// Wenn ein Film nicht gefunden wird, kommt die Exception zum Einsatz.
-// ! Der GlobalExceptionHandler fängt sie ab und erstellt einen 404-Fehler.
+/**
+ * Benutzerdefinierte Exception für nicht gefundene Filme.
+ * Wird geworfen, wenn eine ID im Repository nicht existiert.
+ * ! Der GlobalExceptionHandler fängt diese Exception ab und wandelt sie in einen HTTP 404 Status um.
+ */
 public class MovieNotFoundException extends RuntimeException {
     public MovieNotFoundException(Long id) {
-        super("Film mit der ID " + id + "wurde nicht gefunden.");
+        super("Film mit der ID " + id + " wurde nicht gefunden.");
     }
 }
-

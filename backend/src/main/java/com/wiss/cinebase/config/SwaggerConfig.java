@@ -9,8 +9,8 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Konfiguration für OpenAPI / Swagger UI.
+ * Ermöglicht die automatische Generierung der API-Dokumentation.
  * Erreichbar unter: http://localhost:8080/swagger-ui.html
- *
  * Quelle: Block 04 - API Dokumentation
  */
 @Configuration

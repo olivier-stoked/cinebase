@@ -1,36 +1,35 @@
 package com.wiss.cinebase.repository;
 
+// Quelle: Block 03A - Entities
 import com.wiss.cinebase.entity.AppUser;
+// Quelle: Block 04A - Spring Data JPA
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-// ! Ist mir immer noch nicht 100% schlüssig.
-// * Interface: sobald die App launcht liest Spring die Methodennamen.
-// * Es muss in AppUser gefunden werden, wo die diversen Felder übereinstimmen.
-// * Spring baut den SQL-Code zur Laufzeit automatisch zusammen.
-
-
-// erstellt automatisch eine Datenbankverbindung.
+/**
+ * Repository für den Zugriff auf Benutzerdaten.
+ * Quelle: Block 04A - Repositories
+ * Funktionsweise:
+ * Durch die Erweiterung von JpaRepository erbt dieses Interface Standard-CRUD-Methoden.
+ * Spring Data JPA analysiert zur Laufzeit die Methodennamen und generiert automatisch
+ * die passenden SQL-Queries (Query Derivation).
+ */
 @Repository
 public interface AppUserRepository extends JpaRepository<AppUser, Long> {
 
-    // Spring generiert automatisch das SQL - SELECT * FROM app_users WHERE username = ?
-    // Optional: prüft, ob der User gefunden wurde.
+    // Generiert: SELECT * FROM app_users WHERE username = ?
+    // Optional verhindert NullPointerExceptions, falls der User nicht existiert.
     Optional<AppUser> findByUsername(String username);
 
-    // Erstellt: SELECT * FROM app_user WHERE email = ?
+    // Generiert: SELECT * FROM app_users WHERE email = ?
     Optional<AppUser> findByEmail(String email);
 
-    // Erstellt: SELECT COUNT (*) > 0 FROM app_users WHERE username = ?
-    // True (return) falls User bereits existiert.
+    // ! Performance-Optimierung: Prüft nur auf Existenz, lädt nicht die ganze Entity.
+    // Generiert: SELECT COUNT(*) > 0 FROM app_users WHERE username = ?
     boolean existsByUsername(String username);
 
-    // Erstellt: SELECT COUNT (*) > 0 FROM app_users WHERE email = ?
+    // Generiert: SELECT COUNT(*) > 0 FROM app_users WHERE email = ?
     boolean existsByEmail(String email);
 }
-
-
-
-

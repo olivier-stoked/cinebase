@@ -31,16 +31,14 @@ import java.util.List;
 
 /**
  * Zentrale Sicherheitskonfiguration der Anwendung.
- *
  * Quelle: Block 02B - Security Basics & JWT
- *
  * Anpassungen Single-User zu Multi-User:
- * - Implementierung von Stateless JWT Authentication statt Basic Auth.
- * - Einführung rollenbasierter Zugriffskontrolle (RBAC) für Admin/User.
+ * - Implementierung von Stateless JWT Authentication anstelle von Basic Auth oder Sessions.
+ * - Einführung rollenbasierter Zugriffskontrolle (RBAC) für ADMIN und USER.
  */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity // ! Wichtig: Ermöglicht Nutzung von @PreAuthorize("hasRole('ADMIN')") in Controllern
+@EnableMethodSecurity // Wichtig: Ermöglicht die Nutzung von @PreAuthorize("hasRole('ADMIN')") direkt an Controller-Methoden.
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -53,43 +51,44 @@ public class SecurityConfig {
 
     /**
      * Definition der Security Filter Chain.
-     * Legt fest, welche Filter aktiv sind und wie Anfragen autorisiert werden.
+     * Legt fest, welche Filter in welcher Reihenfolge aktiv sind und wie HTTP-Anfragen autorisiert werden.
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 // 1. CSRF Deaktivierung
-                // Begründung: REST-APIs mit JWT sind stateless; CSRF-Schutz ist primär für Session-Cookies relevant.
+                // Begründung: REST-APIs mit JWT sind zustandslos (stateless); CSRF-Schutz ist primär für Session-Cookies relevant.
                 .csrf(csrf -> csrf.disable())
 
                 // 2. CORS Aktivierung (Konfiguration siehe unten: corsConfigurationSource)
-                // ! Verbindet Frontend (Port 5173) mit Backend (Port 8080)
+                // Verbindet das Frontend (z.B. Port 5173) mit dem Backend (Port 8080).
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 // 3. Zugriffskontrolle (Access Control)
                 .authorizeHttpRequests(auth -> auth
-                        // Öffentliche Endpunkte (Login, Registrierung, Swagger Dokumentation)
+                        // Öffentliche Endpunkte (Login, Registrierung, Swagger Dokumentation) benötigen keine Authentifizierung.
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
-                        // ! ANPASSUNG: Lesezugriff auf Filme/Reviews ist öffentlich (auch für Gäste)
-                        // Schreibzugriffe werden spezifisch im Controller per @PreAuthorize geregelt.
+                        // ANPASSUNG CINEBASE:
+                        // Der Lesezugriff auf Filme und Reviews ist öffentlich (auch für Gäste/nicht eingeloggte User).
+                        // Schreibzugriffe (Create, Update, Delete) werden spezifisch im Controller per @PreAuthorize geregelt.
                         .requestMatchers("/api/movies/**").permitAll()
                         .requestMatchers("/api/reviews/**").permitAll()
 
-                        // Alle übrigen Anfragen erfordern Authentifizierung
+                        // Alle übrigen Anfragen erfordern eine gültige Authentifizierung (JWT).
                         .anyRequest().authenticated()
                 )
 
                 // 4. Session Management: STATELESS
-                // ! Wichtig für JWT: Server speichert keinen Status (keine Session-ID im RAM).
-                // Der Token muss bei jedem Request mitgesendet werden.
+                // Wichtig für JWT: Der Server speichert keinen Session-Status im Arbeitsspeicher.
+                // Der Token muss bei jedem Request im Header mitgesendet werden.
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // 5. Authentication Provider (Verbindung DB-User mit Security-Logik)
+                // 5. Authentication Provider (Verbindung von DB-User-Daten mit der Security-Logik)
                 .authenticationProvider(authenticationProvider())
 
-                // 6. Filter-Reihenfolge: JwtAuthenticationFilter wird VOR dem Standard-Login-Filter ausgeführt
+                // 6. Filter-Reihenfolge: Der JwtAuthenticationFilter wird VOR dem Standard-Login-Filter ausgeführt.
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -102,13 +101,13 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // Frontend URL
+        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // Erlaubte Frontend URL
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Erlaubte HTTP-Methoden
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true); // Erlaubt Credentials (Cookies/Auth-Header)
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration); // Anwendung auf alle Pfade
+        source.registerCorsConfiguration("/**", configuration); // Anwendung dieser Regeln auf alle Pfade
         return source;
     }
 
@@ -118,11 +117,11 @@ public class SecurityConfig {
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(12); // Stärke 12 (Standard ist 10)
+        return new BCryptPasswordEncoder(12); // Stärke 12 (Standard ist oft 10, 12 bietet höhere Sicherheit)
     }
 
     /**
-     * Verknüpft UserDetailsService (Datenbankzugriff) mit dem PasswordEncoder.
+     * Verknüpft den UserDetailsService (Datenbankzugriff) mit dem PasswordEncoder.
      */
     @Bean
     public AuthenticationProvider authenticationProvider() {

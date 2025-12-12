@@ -1,14 +1,26 @@
 package com.wiss.cinebase.entity;
 
-import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List; // WICHTIG: Import für die Liste
+// Verhindert Zirkelbezüge beim Senden von Objekten als JSON.
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
+// Quelle: Block 03A - ORM Mapping
+// JPA-Annotationen für das Datenbank-Mapping.
+import jakarta.persistence.*;
+
+// Import für Listen-Strukturen (OneToMany Beziehungen).
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Repräsentiert einen Film im Festivalkatalog.
+ * Quelle: Block 03A & Projektscope
+ * Multi-User Aspekt:
+ * - Das Feld 'createdBy' verknüpft den Film mit dem Admin, der ihn erstellt hat.
+ * - Dies ermöglicht Rückverfolgbarkeit und rollenbasierte Datenfilterung.
+ */
 @Entity
 @Table(name = "movies")
 public class Movie {
-
-    // ! Movie steht und ist mit User verknüpft. !!!!!
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,51 +29,49 @@ public class Movie {
     @Column(nullable = false)
     private String title;
 
-    // Längere Beschreibung für den Filminhalt. Besser 1000 statt 255 (VARCHAR).
+    // Längere Beschreibung für den Filminhalt. Besser 1000 statt 255 (Standard VARCHAR).
     @Column(length = 1000)
     private String description;
 
     @Column(nullable = false)
     private String genre;
 
-    // Mapping in der Datenbank auf release_year von Java Schreibweise releaseYear.
+    // Mapping in der Datenbank auf 'release_year' (Snake-Case) von Java-Variable 'releaseYear' (Camel-Case).
     @Column(name = "release_year", nullable = false)
     private int releaseYear;
 
     @Column(nullable = false)
     private String director;
 
+    // Basis-Rating oder Durchschnittswert.
     private double rating;
 
     // ! Multi-User Erweiterung
     // Kardinalität: Viele Filme (Many) gehören zu einem User (One).
     // ! fetch = FetchType.LAZY: Performance Schalter - Java lädt nur die Filmdaten und lässt den User (das Feld
-    // ! createdby) frei. Erst wenn die Funktion .getCreatedBy() aufgerufen wird, lädt Java die Daten. Vorteil: ressourcenarm,
-    // ! weniger Befehle, die App läuft schneller, der Server hat weniger zu tun, die Website lädt schneller.
-    // * Gegenteil EAGER: bei EAGER würde Java beim Laden eines Films eine zweite DB-Abfrage starten, um den User zu laden (Film Details).
-    // FetchType.LAZY: Der User wird erst geladen, wenn er explizit angefragt wird.
+    // ! createdBy) frei. Erst wenn die Funktion .getCreatedBy() aufgerufen wird, lädt Java die Daten.
+    // Vorteil: Ressourcenschonend, App läuft schneller, Website lädt schneller.
+    // Gegenteil EAGER: Bei EAGER würde Java beim Laden eines Films sofort eine zweite DB-Abfrage starten.
     @ManyToOne(fetch = FetchType.LAZY)
-
-    // ! Verbindung innerhalb der DB. In der Tabelle "movies" wird die Spalte created_by_user_id angelegt. Die kreierte Zahl
-    // ! ist der Foreign Key (der auf die id-Spalte der Tabelle "app_users" zeigt)
-    // Verknüpfung in der DB-Tabelle ist sauber benannt. SQL ist tabellenartig und enthält keine Objekte. User wird via ID mit dem Film
-    // verbunden. Erleichtert die DB-Struktur und die SQL-Inspektion der DB via DBeaver/Postman.
+    // ! Verbindung innerhalb der DB. In der Tabelle "movies" wird die Spalte 'created_by_user_id' angelegt.
+    // ! Diese ist der Foreign Key auf die 'id'-Spalte der Tabelle "app_users".
     @JoinColumn(name = "created_by_user_id")
+    @JsonIgnore // ! User-Details nicht bei jedem Film-Abruf mitsenden (Datenschutz & Performance).
     private AppUser createdBy;
 
-    // --- NEU (FIX FÜR DAS LÖSCHEN) ---
-    // Hier definieren wir, dass ein Film viele Reviews hat.
+    // ! Definition der Reviews-Beziehung
+    // Ein Film hat viele Reviews.
     // cascade = CascadeType.ALL: Löscht man den Film, werden automatisch alle Reviews mitgelöscht.
     // orphanRemoval = true: Entfernt man ein Review aus der Liste, verschwindet es auch aus der DB.
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore // ! Reviews separat laden (Lazy Loading), nicht automatisch mitsenden.
     private List<Review> reviews = new ArrayList<>();
-    // ---------------------------------
 
     // Leerer Konstruktor (Pflicht für JPA).
     public Movie() {
     }
 
-    // ! Konstruktor ohne ID (DB erstellt diese für die Film automatisch)
+    // ! Konstruktor ohne ID (DB erstellt diese für den Film automatisch).
     public Movie(String title, String description, String genre, int releaseYear, String director, double rating, AppUser createdBy) {
         this.title = title;
         this.description = description;
@@ -72,7 +82,8 @@ public class Movie {
         this.createdBy = createdBy;
     }
 
-    // Getter und Setter.
+    // --- Getter & Setter ---
+
     public Long getId() {
         return id;
     }
@@ -137,7 +148,6 @@ public class Movie {
         this.createdBy = createdBy;
     }
 
-    // --- NEUE GETTER/SETTER FÜR REVIEWS ---
     public List<Review> getReviews() {
         return reviews;
     }

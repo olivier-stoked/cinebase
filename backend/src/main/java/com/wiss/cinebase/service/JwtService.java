@@ -1,9 +1,11 @@
 package com.wiss.cinebase.service;
 
+// Importiert JJWT Klassen für Token-Erstellung und Parsing.
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+// Importiert Spring Value Annotation zum Lesen aus application.properties.
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,10 @@ import java.util.function.Function;
 
 /**
  * Service für JWT Token Generation und Validation.
+ * Quelle: Block 02A - JWT Implementation
+ * Verantwortlich für:
+ * - Erstellen (Signieren) von Tokens beim Login.
+ * - Validieren und Auslesen von Tokens bei Requests.
  */
 @Service
 public class JwtService {
@@ -27,6 +33,7 @@ public class JwtService {
 
     /**
      * Generiert einen Token für einen User.
+     * Fügt Username (Subject) und Rolle (Claim) hinzu.
      */
     public String generateToken(String username, String role) {
         Map<String, Object> claims = new HashMap<>();
@@ -50,7 +57,7 @@ public class JwtService {
 
     /**
      * Validiert den Token (Username passt + nicht abgelaufen).
-     * DAS IST DIE METHODE, DIE IM FILTER FEHLTE!
+     * ! WICHTIG: Diese Methode wird vom JwtAuthenticationFilter verwendet.
      */
     public boolean validateToken(String token, String username) {
         final String extractedUsername = extractUsername(token);

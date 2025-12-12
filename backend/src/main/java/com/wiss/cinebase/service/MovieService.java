@@ -1,47 +1,48 @@
 package com.wiss.cinebase.service;
 
-// "Chefkoch", der die Zutaten (Daten aus dem Repository) nimmt,
-// verarbeitet (Validierung, User-Zuweisung) und das fertige Gericht (DTO) serviert.
-// Businesslogik der App
-
-// ! RAUSARBEITEN !!!!!!!!!!!!!!!!!
-// ! Multi-User Aspekt: bei Erstellung des Films, welcher Admin ist gerade eingeloggt - Verknüpfung des Films mit diesem Admin.
-
+// Importiert DTOs für den Datentransfer zwischen Controller und Service.
 import com.wiss.cinebase.dto.MovieDTO;
+// Importiert Entities für die Datenbankinteraktion.
 import com.wiss.cinebase.entity.AppUser;
 import com.wiss.cinebase.entity.Movie;
+// Importiert Exceptions für Fehlerbehandlung.
 import com.wiss.cinebase.exception.MovieNotFoundException;
+// Importiert Mapper zur Umwandlung von Entity <-> DTO.
 import com.wiss.cinebase.mapper.MovieMapper;
+// Importiert Repositories für Datenzugriff.
 import com.wiss.cinebase.repository.AppUserRepository;
 import com.wiss.cinebase.repository.MovieRepository;
-import com.wiss.cinebase.repository.ReviewRepository; // ! NEU: Import für Durchschnittsberechnung
+import com.wiss.cinebase.repository.ReviewRepository;
+
+// Importiert Security-Klassen für den Zugriff auf den eingeloggten User.
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+// Importiert Spring Service Annotationen.
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // Spring relevanter Import!
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors; // ! NEU: Für die Listen-Verarbeitung
+import java.util.stream.Collectors;
 
 /**
  * Service für die Verwaltung von Filmen.
- * Diese Klasse enthält die Geschäftslogik für das Erstellen, Lesen, Aktualisieren und Löschen (CRUD)
- * von Filmen. Sie stellt sicher, dass Filme korrekt mit den erstellenden Benutzern verknüpft werden
- * und handhabt Transaktionen.
+ * Quelle: Block 01B (Service Layer) & Block 05A (Transactions)
+ * Verantwortlichkeiten:
+ * - CRUD-Operationen für Filme.
+ * - Multi-User: Verknüpfung von Filmen mit dem erstellenden Admin.
+ * - Integration von Durchschnittsbewertungen aus dem ReviewRepository.
  */
 @Service
-// ! Jede Methode läuft in einer Transaktion (ACID-Prinzip: Alles oder nichts)
-@Transactional
-
+@Transactional // ! Jede Methode läuft in einer Transaktion (ACID-Prinzip: Alles oder nichts).
 public class MovieService {
+
     private final MovieRepository movieRepository;
     private final AppUserRepository appUserRepository;
-    private final ReviewRepository reviewRepository; // ! NEU: Injizieren des Review Repositories
+    private final ReviewRepository reviewRepository;
 
-    // Konstruktor-Injektion (best practice in diesem Fall) statt @Autowired - bessere Testbarkeit
     public MovieService(MovieRepository movieRepository,
                         AppUserRepository appUserRepository,
-                        ReviewRepository reviewRepository) { // ! NEU: Parameter hinzugefügt
+                        ReviewRepository reviewRepository) {
         this.movieRepository = movieRepository;
         this.appUserRepository = appUserRepository;
         this.reviewRepository = reviewRepository;
@@ -49,62 +50,44 @@ public class MovieService {
 
     /**
      * Erstellt einen neuen Film und speichert ihn in der Datenbank.
-     * Der Film wird automatisch mit dem aktuell eingeloggten Benutzer (Admin) verknüpft,
-     * der im SecurityContext hinterlegt ist.
-     * @param movieDTO Die Daten des neuen Films (vom Frontend)
-     * @return Der gespeicherte Film als DTO (inklusive generierter ID)
-     * @throws UsernameNotFoundException wenn der eingeloggte User nicht in der DB gefunden wird (Sicherheits-Edge-Case)
+     * ! Multi-User Aspekt:
+     * Der Film wird automatisch mit dem aktuell eingeloggten Benutzer (Admin) verknüpft.
+     * Wir holen den User aus dem SecurityContext, nicht vom Frontend (Sicherheit!).
+     * @param movieDTO Die Daten des neuen Films
+     * @return Der gespeicherte Film als DTO
      */
     public MovieDTO createMovie(MovieDTO movieDTO) {
-
-        // Neue Filmerstellung und Verknüpfung mit eingeloggtem Admin
-
-        // Eingeloggten Admin bestimmt via des Security Context
-        // ! hat Token geprüft und User in den "SecurityContext" gelegt
-        // ! Umgehung des Controllers. Service ruft über Security Context den Namen des Admin ab
-        // ! Verhinderung, dass Filme unter falschem Namen angelegt werden
-
-
-        // ! SECURITY: Wir holen den User aus dem SecurityContext, nicht vom Frontend!
-        // Das verhindert, dass man Filme unter falschem Namen anlegen kann.
-
+        // 1. Eingeloggten Admin ermitteln
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         AppUser currentUser = appUserRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User nicht gefunden " + username));
+                .orElseThrow(() -> new UsernameNotFoundException("User nicht gefunden: " + username));
 
-
-        // DTO zur Entity mappen
-        // Mapping: DTO in Datenbank-Entity umwandeln
+        // 2. Mapping DTO -> Entity
         Movie movie = MovieMapper.toEntity(movieDTO);
 
-        // Beziehung setzen
-        // Logik: Die Beziehung zum Admin setzen
+        // 3. Beziehung setzen (Film gehört zu diesem Admin)
         movie.setCreatedBy(currentUser);
 
-        // Abspeichern
-        Movie saveMovie = movieRepository.save(movie);
+        // 4. Speichern
+        Movie savedMovie = movieRepository.save(movie);
 
-        // Rückgabe ans DTO
-        return MovieMapper.toDTO(saveMovie);
+        return MovieMapper.toDTO(savedMovie);
     }
 
-    // Rückgabe aller Filme
-    // ! Optimierung für Lesezugriff
-    /** Ruft eine Liste aller verfügbaren Filme ab. */
-
-    // ! Der Service muss jetzt beim Laden aller Filme (getAllMovies) kurz beim ReviewRepository nachfragen:
-    // ! "Wie ist der Durchschnitt für diesen Film?".
-
-    @Transactional(readOnly = true) // ! Performance: readOnly optimiert die Datenbankabfrage
+    /**
+     * Ruft eine Liste aller verfügbaren Filme ab.
+     * ! Performance: readOnly=true optimiert die Datenbankabfrage (kein Dirty Checking).
+     * ! Logik: Für jeden Film wird live der Durchschnittswert aus der Review-Tabelle berechnet.
+     */
+    @Transactional(readOnly = true)
     public List<MovieDTO> getAllMovies() {
-        // ! ANPASSUNG: Wir nutzen Streams, um für jeden Film den Durchschnitt zu berechnen
         return movieRepository.findAll().stream()
                 .map(movie -> {
-                    // 1. Entity zu DTO umwandeln
+                    // Entity zu DTO
                     MovieDTO dto = MovieMapper.toDTO(movie);
 
-                    // 2. ! NEU: Live-Durchschnitt aus der Review-Tabelle holen (Custom Query Block 05B)
+                    // Durchschnittsbewertung laden (Quelle: Block 05B Custom Queries)
                     Double avg = reviewRepository.getAverageRatingForMovie(movie.getId());
                     dto.setAverageRating(avg != null ? avg : 0.0);
 
@@ -115,11 +98,7 @@ public class MovieService {
 
     /**
      * Sucht einen spezifischen Film anhand seiner ID.
-     * @param id Die ID des gesuchten Films
-     * @return Das gefundene MovieDTO
-     * @throws MovieNotFoundException wenn kein Film mit dieser ID existiert
      */
-
     @Transactional(readOnly = true)
     public MovieDTO getMovieById(Long id) {
         Movie movie = movieRepository.findById(id)
@@ -127,47 +106,41 @@ public class MovieService {
 
         MovieDTO dto = MovieMapper.toDTO(movie);
 
-        // ! NEU: Auch beim Einzelabruf den Durchschnitt setzen
+        // Auch beim Einzelabruf den aktuellen Durchschnitt setzen
         Double avg = reviewRepository.getAverageRatingForMovie(movie.getId());
         dto.setAverageRating(avg != null ? avg : 0.0);
 
         return dto;
     }
 
-    // Aktualisierung eines Films
+    /**
+     * Aktualisiert einen bestehenden Film.
+     */
     public MovieDTO updateMovie(Long id, MovieDTO movieDTO) {
         Movie existingMovie = movieRepository.findById(id)
                 .orElseThrow(() -> new MovieNotFoundException(id));
 
-        // Felderaktualisierung
+        // Felder aktualisieren
         existingMovie.setTitle(movieDTO.getTitle());
         existingMovie.setDescription(movieDTO.getDescription());
         existingMovie.setGenre(movieDTO.getGenre());
         existingMovie.setReleaseYear(movieDTO.getReleaseYear());
         existingMovie.setDirector(movieDTO.getDirector());
-        existingMovie.setRating(movieDTO.getRating());
+        existingMovie.setRating(movieDTO.getRating()); // Basis-Rating der Jury
 
-        // ! JPA Magic: Durch @Transactional würde die Änderung auch ohne save() erkannt ("Dirty Checking"). KI !!!!
-        // Wir rufen save() trotzdem explizit auf, um den Code verständlicher zu machen.
-        // Abspeichern (trotzdem erkennt JPA Änderung automatisch via @Transactional) - better safe than sorry
+        // Speichern (explizit, obwohl @Transactional Dirty Checking macht)
         Movie updatedMovie = movieRepository.save(existingMovie);
         return MovieMapper.toDTO(updatedMovie);
     }
 
     /**
-     * Löscht einen Film unwiderruflich aus der Datenbank.
-     * @param id Die ID des zu löschenden Films
-     * @throws MovieNotFoundException wenn der Film nicht existiert
+     * Löscht einen Film unwiderruflich.
      */
-
     public void deleteMovie(Long id) {
-        // ! Wir prüfen vorher, ob er existiert, um eine saubere Exception zu werfen
         if (!movieRepository.existsById(id)) {
             throw new MovieNotFoundException(id);
         }
-
+        // ! Dank CascadeType.ALL in der Entity werden auch alle Reviews gelöscht.
         movieRepository.deleteById(id);
-
     }
-
 }

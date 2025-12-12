@@ -6,25 +6,24 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-// extends JpaRepository bekommen wir Methoden wie .save(), .findAll() und .delete() geschenkt.
-// Die Methode findByCreatedBy_Id ist ein mächtiges Feature von Spring Data: Es versteht, dass wir im Movie das Feld createdBy haben (den User), und dieser User eine id hat. Daraus baut es den SQL-Join automatisch.
-
+/**
+ * Repository für Film-Operationen.
+ * Quelle: Block 04A & 05A
+ */
 @Repository
 public interface MovieRepository extends JpaRepository<Movie, Long> {
 
-    // * Spring analysiert findByGenre. Automatischer Bau der DB-Abfrage: Spring weiß, dass die entity Movie ein Feld genre hat.
-    // Spring: lediglich Methodenname wird definiert. Spring generiert das SQL.
-    // SELECT * FROM movies WHERE genre = ?
+    // Generiert: SELECT * FROM movies WHERE genre = ?
     List<Movie> findByGenre(String genre);
 
-    // SELECT * FROM movies WHERE created_by_user_id = ?
-    // ! Wichtig für das Dashboard: Filmanzeige
+    // ! Property Expression: Spring erkennt 'CreatedBy' als Feld in Movie und '_Id' als Feld im User.
+    // Generiert einen automatischen JOIN:
+    // SELECT m.* FROM movies m JOIN app_users u ON m.created_by_user_id = u.id WHERE u.id = ?
+    // Wichtig für das Admin-Dashboard ("Meine erstellten Filme").
     List<Movie> findByCreatedBy_Id(Long id);
 
-    // --- NEU HINZUFÜGEN ---
-    // Findet Filme anhand des Titels (Teil-Übereinstimmung, Groß/Kleinschreibung egal)
-    // Wird vom DataInitializer benötigt, um Duplikate zu vermeiden!
+    // Generiert eine Suche mit Wildcards (LIKE %title%).
+    // Ignoriert Groß-/Kleinschreibung (Lower/Upper Case).
     // Quelle: Block 05A - Advanced Query Methods
     List<Movie> findByTitleContainingIgnoreCase(String title);
-
 }

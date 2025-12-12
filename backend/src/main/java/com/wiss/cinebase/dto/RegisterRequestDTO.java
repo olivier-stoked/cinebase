@@ -1,33 +1,36 @@
 package com.wiss.cinebase.dto;
 
+// Importiert Validierungs-Annotationen für E-Mail-Format, Pflichtfelder und Textlänge.
+// Quelle: Block 06A - Form Validation Basics
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 /**
  * DTO für die Registrierungs-Anfrage.
- * Enthält Validierungs-Regeln für sichere Inputs.
- *
+ * Enthält Validierungs-Regeln für sichere Inputs (Bean Validation).
  * Quelle: Block 01B - DTOs und AuthController
+ * Validierung: Block 06A (Backend-seitig)
  */
 public class RegisterRequestDTO {
 
-    @NotBlank(message = "Username ist erforderlich")
-    @Size(min = 3, max = 50, message = "Username muss 3-50 Zeichen haben")
+    @NotBlank(message = "Benutzername ist erforderlich")
+    @Size(min = 3, max = 50, message = "Benutzername muss zwischen 3 und 50 Zeichen lang sein")
     private String username;
 
-    @NotBlank(message = "Email ist erforderlich")
-    @Email(message = "Email muss gültig sein")
+    @NotBlank(message = "E-Mail ist erforderlich")
+    @Email(message = "E-Mail muss ein gültiges Format haben")
     private String email;
 
     @NotBlank(message = "Passwort ist erforderlich")
-    @Size(min = 6, message = "Passwort muss mindestens 6 Zeichen haben")
+    @Size(min = 6, message = "Passwort muss mindestens 6 Zeichen lang sein")
     private String password;
 
-    // Default Constructor für JSON Deserialisierung
+    // Default Konstruktor für JSON-Deserialisierung
     public RegisterRequestDTO() {}
 
-    // Getter & Setter
+    // Getter und Setter
+
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
 

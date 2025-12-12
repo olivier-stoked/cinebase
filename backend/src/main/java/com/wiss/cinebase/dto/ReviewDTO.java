@@ -1,30 +1,35 @@
 package com.wiss.cinebase.dto;
 
+// Importiert Validierungs-Annotationen für Pflichtfelder (NotNull) und Wertebereiche.
+// Quelle: Block 06A - Form Validation Basics
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+
+// Importiert die Klasse für Zeitstempel.
 import java.time.LocalDateTime;
 
 /**
  * DTO für Bewertungen (Reviews).
  * Dient dem Datentransfer zwischen API und Service.
- *
  * Quelle: Block 04A - DTOs
  * Validation: Block 06A - Bean Validation
+ * Multi-User Aspekt:
+ * Verknüpft eine Bewertung via 'movieId' mit einem Film und via 'username' (Output) mit einem Autor.
  */
 public class ReviewDTO {
 
     private Long id;
 
-    // Nur für die Anzeige (Output): Wer hat die Review geschrieben?
+    // Output-Feld: Name des Verfassers (wird vom Mapper gesetzt)
     private String username;
 
-    // Für die Erstellung (Input): Zu welchem Film gehört die Review?
+    // Input-Feld: Zu welchem Film gehört die Review? (Pflichtfeld)
     @NotNull(message = "Film ID ist erforderlich")
     private Long movieId;
 
-    // Bewertungsskala 1-10 (entspricht 0.5 bis 5 Sterne)
+    // Bewertungsskala 1-10 (entspricht 0.5 bis 5 Sterne im Frontend)
     @Min(value = 1, message = "Bewertung muss mindestens 1 sein")
     @Max(value = 10, message = "Bewertung darf maximal 10 sein")
     private int rating;
@@ -32,11 +37,10 @@ public class ReviewDTO {
     @Size(max = 1000, message = "Kommentar darf maximal 1000 Zeichen lang sein")
     private String comment;
 
-    // Nur für die Anzeige: Wann wurde sie erstellt?
+    // Zeitstempel der Erstellung (wichtig für Sortierung im Frontend)
     private LocalDateTime createdAt;
 
-    // --- Konstruktoren ---
-
+    // Default Konstruktor
     public ReviewDTO() {}
 
     public ReviewDTO(Long id, String username, Long movieId, int rating, String comment, LocalDateTime createdAt) {
@@ -48,7 +52,7 @@ public class ReviewDTO {
         this.createdAt = createdAt;
     }
 
-    // --- Getter & Setter ---
+    // Getter und Setter
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

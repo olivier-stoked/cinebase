@@ -9,32 +9,27 @@ import java.util.List;
 
 /**
  * Repository für Bewertungen.
- * Enthält Custom Queries für Statistiken (Durchschnitt).
- * Quelle: Block 05B - Custom Queries
+ * Enthält Custom Queries für statistische Auswertungen.
+ *
+ * Quelle: Block 05B - Custom Queries & Aggregation
  */
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
-    // 1. Alle Reviews zu einem bestimmten Film finden (z.B. für die Detailansicht im Frontend)
+    // 1. Alle Reviews zu einem bestimmten Film finden (z.B. für die Detailansicht).
     List<Review> findByMovieId(Long movieId);
 
-    // 2. Alle Reviews eines bestimmten Users finden (für "Meine Rezensionen" Dashboard)
+    // 2. Alle Reviews eines bestimmten Users finden (für "Meine Rezensionen" Dashboard).
     List<Review> findByUserId(Long userId);
 
-    /**
-     * Berechnet die Durchschnittsbewertung für einen Film direkt in der Datenbank.
-     * Nutzt die SQL-Funktion AVG().
-     *
-     * @param movieId Die ID des Films
-     * @return Der Durchschnittswert (kann null sein, wenn keine Reviews existieren)
-     */
-
-    // ! @Query("SELECT AVG..."): Hier greifen wir manuell ein. Wir lassen die Datenbank rechnen. Das Ergebnis ist
-    // ! ein Double (z.B. 7.5), den wir später im Frontend anzeigen können. Das erfüllt Ihre Anforderung nach der Durchschnittsberechnung.
-
+    // ! Custom Query mit JPQL (Java Persistence Query Language).
+    // Hier wird nicht auf Tabellen, sondern auf Java-Objekte (Review r) referenziert.
+    // Die Datenbank übernimmt die Berechnung des Durchschnitts (AVG), was performanter ist,
+    // als alle Reviews zu laden und in Java zu berechnen.
     @Query("SELECT AVG(r.rating) FROM Review r WHERE r.movie.id = :movieId")
     Double getAverageRatingForMovie(Long movieId);
 
-    // Prüfen, ob User diesen Film schon bewertet hat (verhindert doppelte Bewertungen/Spam)
+    // Prüft, ob eine Kombination aus User und Film bereits existiert.
+    // Verhindert doppelte Bewertungen (Business-Regel).
     boolean existsByUserIdAndMovieId(Long userId, Long movieId);
 }

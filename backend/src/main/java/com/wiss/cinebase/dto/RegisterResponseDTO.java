@@ -1,9 +1,10 @@
 package com.wiss.cinebase.dto;
 
+// (Keine Imports nötig, da nur Standard-Java-Datentypen verwendet werden)
+
 /**
  * DTO für die Antwort nach erfolgreicher Registrierung.
- * Gibt KEIN Passwort zurück!
- *
+ * Gibt eine Bestätigung mit den angelegten Daten zurück (ohne Passwort).
  * Quelle: Block 01B - DTOs und AuthController
  */
 public class RegisterResponseDTO {
@@ -19,7 +20,8 @@ public class RegisterResponseDTO {
         this.role = role;
     }
 
-    // Getter & Setter
+    // Getter und Setter
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

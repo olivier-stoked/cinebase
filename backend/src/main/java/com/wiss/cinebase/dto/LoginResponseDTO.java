@@ -1,20 +1,22 @@
 package com.wiss.cinebase.dto;
 
+// (Keine Imports nötig, da nur Standard-Java-Datentypen verwendet werden)
+
 /**
  * DTO für die Antwort nach erfolgreichem Login.
- * Enthält den JWT Token und Basis-Infos zum User.
- *
+ * Enthält den JWT Token und Basis-Informationen zum User für das Frontend (State).
  * Quelle: Block 02A - Login DTOs & Endpoint
+ * Sicherheits-Aspekt: Das Passwort wird hier NIEMALS zurückgegeben.
  */
 public class LoginResponseDTO {
 
     private String token;
-    private String tokenType = "Bearer";
+    private String tokenType = "Bearer"; // Standard-Typ für JWT Autorisierung
     private Long userId;
     private String username;
     private String email;
     private String role;
-    private long expiresIn;
+    private long expiresIn; // Token-Gültigkeit in Millisekunden
 
     public LoginResponseDTO(String token, Long userId, String username, String email, String role, long expiresIn) {
         this.token = token;
@@ -25,7 +27,8 @@ public class LoginResponseDTO {
         this.expiresIn = expiresIn;
     }
 
-    // Getter & Setter
+    // Getter und Setter
+
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
 
