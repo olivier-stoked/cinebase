@@ -1,16 +1,32 @@
+version: '3.8'
+
+# Quelle: Block 05 - Containerisierung & Datenbank
+# Definition der Infrastruktur-Services für die Multi-User Umgebung.
 services:
   cinebase_db:
     image: postgres:15
     container_name: cinebase_postgres_container
+
+    # Umgebungsvariablen zur Initialisierung der Datenbank
+    # ! WICHTIG: Müssen exakt mit den Werten in application.properties übereinstimmen
     environment:
       POSTGRES_DB: cinebase_multiuser_app
       POSTGRES_USER: cinebase_user
       POSTGRES_PASSWORD: cinebase_password
+
+    # Port Mapping: Host 5435 -> Container 5432
+    # Verwendung von Port 5435 vermeidet Konflikte mit lokalen PostgreSQL-Installationen
     ports:
       - "5435:5432"
+
+    # Persistente Datenspeicherung via Volume Mapping
+    # Verhindert Datenverlust beim Neustart des Containers
     volumes:
       - cinebase_postgres_data:/var/lib/postgresql/data
+
+    # Restart Policy für erhöhte Ausfallsicherheit
     restart: unless-stopped
 
+# Definition des Docker Volumes für die Datenpersistenz
 volumes:
   cinebase_postgres_data:

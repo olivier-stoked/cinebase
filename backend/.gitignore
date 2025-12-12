@@ -1,16 +1,16 @@
-# Compiled class files
+# ==============================================================
+# COMPILED CLASSES & LOGS
+# Quelle: Block 01 - Git Basics
+# ==============================================================
 *.class
-
-# Log files
 *.log
-
-# BlueJ files
 *.ctxt
-
-# Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
-# Package Files (außer Maven Wrapper JAR)
+# ==============================================================
+# PACKAGE FILES
+# ==============================================================
+# Generierte Artefakte ausschließen
 *.jar
 *.war
 *.nar
@@ -19,13 +19,19 @@
 *.tar.gz
 *.rar
 
-# Maven Wrapper JAR soll BLEIBEN
+# ! WICHTIG: Maven Wrapper JAR soll im Repo bleiben (für CI/CD und Portabilität)
 !/.mvn/wrapper/maven-wrapper.jar
+
+# ==============================================================
+# BUILD OUTPUT
+# ==============================================================
+# Maven Standard Build-Verzeichnis
+target/
+# Frontend/Submodule Build-Verzeichnisse ausschließen
 !/**/src/main/**/target/
 !/**/src/test/**/target/
 
-# Maven Build Output
-target/
+# Maven Release & Versioning Files
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -35,7 +41,10 @@ dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
 
-# IDE Files
+# ==============================================================
+# IDE CONFIGURATION (IntelliJ, Eclipse, VSCode)
+# Sollte nicht geteilt werden, da user-spezifisch
+# ==============================================================
 .idea/
 *.iws
 *.iml
@@ -54,14 +63,18 @@ local.properties
 .loadpath
 .recommenders
 
-# Spring Boot
+# ==============================================================
+# GRADLE & SPRING BOOT CACHES
+# ==============================================================
 .gradle/
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-# OS Files
+# ==============================================================
+# OS SPECIFIC FILES
+# ==============================================================
 .DS_Store
 .DS_Store?
 ._*
@@ -70,6 +83,9 @@ build/
 ehthumbs.db
 Thumbs.db
 
-# Application Properties (falls sensitive Daten)
+# ==============================================================
+# SECURITY / SECRETS
+# ==============================================================
+# Lokale Konfigurationsdateien mit sensiblen Daten
 # application-local.properties
 # application-dev.properties
