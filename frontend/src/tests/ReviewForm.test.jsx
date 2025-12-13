@@ -1,12 +1,13 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import ReviewForm from "../components/ReviewForm";
+import ReviewForm from "./ReviewForm";
 
-
-// ! Frontend Test 2: Interaktion
-// ! Hier testen wir das Bewertungsformular. Wir prüfen, ob die Eingabefelder da sind
-// ! und ob beim Klick auf "Speichern" die Funktion aufgerufen wird.
-
+/**
+ * Frontend Test 2: Interaktion & Formulare
+ * Testet, ob das Bewertungsformular korrekt rendert und ob
+ * die Buttons (Speichern/Abbrechen) die erwarteten Events auslösen.
+ * Quelle: Block 06B - Component Interaction Testing
+ */
 describe('ReviewForm Component', () => {
 
     it('rendert das Formular korrekt', () => {
@@ -17,6 +18,9 @@ describe('ReviewForm Component', () => {
 
         // Prüfen, ob das Textfeld für Kommentare existiert
         expect(screen.getByPlaceholderText(/Was denkst du über den Film?/i)).toBeInTheDocument();
+
+        // Prüfen, ob das Dropdown vorhanden ist
+        expect(screen.getByRole('combobox')).toBeInTheDocument();
     });
 
     it('ruft onCancel auf, wenn Abbrechen geklickt wird', () => {
@@ -29,7 +33,7 @@ describe('ReviewForm Component', () => {
         const cancelButton = screen.getByRole('button', { name: /Abbrechen/i });
         fireEvent.click(cancelButton);
 
-        // 3. Assert: Wurde die Funktion aufgerufen?
+        // 3. Assert: Wurde die Funktion genau einmal aufgerufen?
         expect(handleCancel).toHaveBeenCalledTimes(1);
     });
 });

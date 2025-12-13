@@ -1,12 +1,8 @@
 import apiClient from "./api-client";
 
-
-// Dieser Service stellt die Verbindung zum Backend her.
-
 /**
- * Fügt eine neue Bewertung hinzu.
- * Quelle: Analogie zu game-service.js (Daten senden)
- * @param {Object} reviewData - { movieId, rating, comment }
+ * Sendet eine neue Bewertung an das Backend.
+ * @param {Object} reviewData - Das ReviewDTO.
  */
 export const addReview = async (reviewData) => {
     try {
@@ -20,8 +16,8 @@ export const addReview = async (reviewData) => {
 
 /**
  * Lädt die Durchschnittsbewertung für einen Film.
- * Quelle: Analogie zu leaderboard-service.js (Statistiken laden)
- * @param {number} movieId
+ * @param {number} movieId - Die ID des Films.
+ * @returns {Promise<number>} Der Durchschnittswert.
  */
 export const getAverageRating = async (movieId) => {
     try {
@@ -29,13 +25,14 @@ export const getAverageRating = async (movieId) => {
         return response.data;
     } catch (error) {
         console.error(`Fehler beim Laden des Durchschnitts für Film ${movieId}:`, error);
-        // Kein Fehler werfen, sondern 0.0 zurückgeben, damit die UI nicht kaputt geht
+        // Fallback auf 0.0 bei Fehler
         return 0.0;
     }
 };
 
 /**
- * Lädt alle Reviews für einen Film.
+ * Lädt alle Reviews zu einem bestimmten Film.
+ * @param {number} movieId - Die ID des Films.
  */
 export const getReviewsByMovie = async (movieId) => {
     try {

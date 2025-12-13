@@ -3,7 +3,6 @@ package com.wiss.cinebase.config;
 // Quelle: Block 03A - JPA Entities
 import com.wiss.cinebase.entity.AppUser;
 import com.wiss.cinebase.entity.Movie;
-import com.wiss.cinebase.entity.Review;
 import com.wiss.cinebase.entity.Role;
 
 // Quelle: Block 04A - Repositories
@@ -22,8 +21,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.List;
 
 /**
- * Initialisiert die Datenbank mit Testdaten beim Start der Anwendung.
- * Erstellt Admins, User, Filme und Reviews, sofern die Datenbank leer ist.
+ * Initialisiert die Datenbank mit Basisdaten beim Start der Anwendung.
+ * Erstellt notwendige Admin- und Test-User sowie den Filmkatalog.
+ *
  * Quelle: Filmliste.txt (aus Aufgabenstellung)
  * Konzept: Data Initializer aus Block 07
  */
@@ -37,7 +37,7 @@ public class DataInitializer {
                                    PasswordEncoder passwordEncoder) {
         return args -> {
 
-            // --- 1. User erstellen (2 Admins, 3 Journalisten/User) ---
+            // --- 1. User erstellen (2 Admins, 3 Journalisten) ---
             // Multi-User Aspekt: Erstellung verschiedener Rollen zum Testen von Berechtigungen.
 
             // Admin 1 (Festival-Leitung)
@@ -46,11 +46,11 @@ public class DataInitializer {
             AppUser admin2 = createOrGetUser(userRepository, passwordEncoder, "co_admin", "leitung@cinebase.ch", Role.ADMIN);
 
             // User 1 (Der Kritische)
-            AppUser critic = createOrGetUser(userRepository, passwordEncoder, "kritiker_hans", "hans@presse.ch", Role.USER);
+            createOrGetUser(userRepository, passwordEncoder, "kritiker_hans", "hans@presse.ch", Role.USER);
             // User 2 (Der Sci-Fi Fan)
-            AppUser scifiFan = createOrGetUser(userRepository, passwordEncoder, "scifi_sarah", "sarah@nerd.ch", Role.USER);
+            createOrGetUser(userRepository, passwordEncoder, "scifi_sarah", "sarah@nerd.ch", Role.USER);
             // User 3 (Der Mainstream Zuschauer)
-            AppUser casual = createOrGetUser(userRepository, passwordEncoder, "max_mustermann", "max@web.ch", Role.USER);
+            createOrGetUser(userRepository, passwordEncoder, "max_mustermann", "max@web.ch", Role.USER);
 
             System.out.println("Benutzerkonten wurden initialisiert (Passwort für alle: admin123)");
 
@@ -94,33 +94,6 @@ public class DataInitializer {
 
                 movieRepository.saveAll(movies);
                 System.out.println(movies.size() + " Filme erfolgreich initialisiert!");
-
-
-                // --- 3. Beispiel-Bewertungen erstellen ---
-                // Erzeugung der Community-Daten (AverageRating).
-                // Verwendung ganzer Zahlen (1-10) harmonisiert mit dem Frontend.
-
-                Movie matrix = movieRepository.findByTitleContainingIgnoreCase("The Matrix").get(0);
-                Movie alien = movieRepository.findByTitleContainingIgnoreCase("Alien").get(0);
-                Movie solaris = movieRepository.findByTitleContainingIgnoreCase("Solaris").get(0);
-
-                List<Review> reviews = List.of(
-                        // Matrix (Sehr gut)
-                        new Review(scifiFan, matrix, 10, "Absolutes Meisterwerk!"),
-                        new Review(critic, matrix, 9, "Visuell beeindruckend, Story etwas verwirrend."),
-                        new Review(casual, matrix, 10, "Bester Film aller Zeiten!"),
-
-                        // Alien (Gut bis Mittel)
-                        new Review(scifiFan, alien, 9, "Klassiker des Horror-SciFi."),
-                        new Review(casual, alien, 7, "Zu gruselig für mich."),
-
-                        // Solaris (Gemischt)
-                        new Review(casual, solaris, 3, "Zu langweilig, bin eingeschlafen."),
-                        new Review(critic, solaris, 9, "Intellektuell fordernd, grandios.")
-                );
-
-                reviewRepository.saveAll(reviews);
-                System.out.println("Beispiel-Reviews erstellt!");
 
             } else {
                 System.out.println("Daten bereits vorhanden. Überspringe Initialisierung.");

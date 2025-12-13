@@ -1,11 +1,11 @@
 import { useState } from "react";
 
 /**
- * Kleines Formular für die Bewertung eines Films.
- * Wird direkt in der MovieCard angezeigt.
+ * Formular zum Abgeben einer Bewertung.
+ * Wird direkt in der MovieCard eingebunden.
+ * Logik: Skaliert die Punkte (0-10) für das Backend.
  */
 const ReviewForm = ({ movieId, onReviewSubmit, onCancel }) => {
-    // Standard auf 10 (Exzellent) oder 5 (Durchschnitt) setzen
     const [rating, setRating] = useState(10);
     const [comment, setComment] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -17,34 +17,32 @@ const ReviewForm = ({ movieId, onReviewSubmit, onCancel }) => {
         setError("");
 
         try {
-            // Daten vorbereiten für das Backend (DTO Struktur)
+            // Datenstruktur für das ReviewDTO
             const reviewData = {
                 movieId: movieId,
-                rating: parseInt(rating), // WICHTIG: Integer erzwingen
+                rating: parseInt(rating), // Sicherstellen, dass es ein Integer ist
                 comment: comment
             };
 
-            // Callback an die Eltern-Komponente aufrufen
+            // Daten an Eltern-Komponente übergeben
             await onReviewSubmit(reviewData);
 
-            // Formular zurücksetzen
+            // Reset nach Erfolg
             setRating(10);
             setComment("");
         } catch (err) {
-            // Fehlermeldung vom Backend anzeigen
-            setError(err.response?.data?.error || "Fehler beim Bewerten.");
+            setError(err.response?.data?.message || "Fehler beim Bewerten.");
         } finally {
             setIsSubmitting(false);
         }
     };
 
     return (
-        // Style angepasst für Dark Mode (Dunkelgrau #333 statt Weiß #f9f9f9)
         <div style={{ marginTop: "1rem", padding: "1rem", background: "#333", borderRadius: "8px", border: "1px solid #444" }}>
             <h4 style={{ margin: "0 0 10px 0", color: "#fff" }}>Film bewerten</h4>
 
             <form onSubmit={handleSubmit}>
-                {/* Rating Auswahl 0-10 (Dropdown für klare Zuordnung) */}
+                {/* Punkteauswahl (0-10) */}
                 <div style={{ marginBottom: "10px" }}>
                     <label style={{ display: "block", marginBottom: "5px", color: "#ccc", fontSize: "0.9rem" }}>
                         Punktevergabe:
@@ -54,9 +52,8 @@ const ReviewForm = ({ movieId, onReviewSubmit, onCancel }) => {
                         value={rating}
                         onChange={(e) => setRating(e.target.value)}
                         disabled={isSubmitting}
-                        style={{ background: "#444", color: "white", border: "1px solid #555" }} // Dark Input
+                        style={{ background: "#444", color: "white", border: "1px solid #555" }}
                     >
-                        {/* Harmonisierte Skala: 1 Punkt = 1/2 Stern */}
                         <option value="10">10 Punkte (⭐⭐⭐⭐⭐ Exzellent)</option>
                         <option value="9"> 9 Punkte (⭐⭐⭐⭐½ Herausragend)</option>
                         <option value="8"> 8 Punkte (⭐⭐⭐⭐ Sehr gut)</option>
@@ -71,7 +68,7 @@ const ReviewForm = ({ movieId, onReviewSubmit, onCancel }) => {
                     </select>
                 </div>
 
-                {/* Kommentar Feld */}
+                {/* Kommentarfeld */}
                 <div style={{ marginBottom: "10px" }}>
                     <label style={{ display: "block", marginBottom: "5px", color: "#ccc", fontSize: "0.9rem" }}>
                         Kommentar (optional):
@@ -84,14 +81,13 @@ const ReviewForm = ({ movieId, onReviewSubmit, onCancel }) => {
                         rows="2"
                         maxLength="500"
                         disabled={isSubmitting}
-                        style={{ background: "#444", color: "white", border: "1px solid #555" }} // Dark Input
+                        style={{ background: "#444", color: "white", border: "1px solid #555" }}
                     />
                 </div>
 
-                {/* Error Anzeige */}
                 {error && <div style={{ color: "#ff6b6b", fontSize: "0.9rem", marginBottom: "10px" }}>{error}</div>}
 
-                {/* Buttons */}
+                {/* Action Buttons */}
                 <div style={{ display: "flex", gap: "10px" }}>
                     <button
                         type="submit"

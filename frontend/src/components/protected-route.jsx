@@ -2,16 +2,17 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 /**
- * ProtectedRoute Component
- * Schützt Routen vor unauthentifizierten Zugriffen.
+ * Wrapper-Komponente für geschützte Routen.
+ * Prüft Authentifizierung und Rollenberechtigung.
+ * Quelle: Block 04B - Protected Routes
  *
- * @param {Object} children - Die zu schützende Seite (z.B. <Movies />)
- * @param {string} requiredRole - Optional: Erforderliche Rolle (z.B. "ADMIN")
+ * @param {Object} children - Die zu schützende Komponente (z.B. <AdminDashboard />).
+ * @param {string} requiredRole - Optional: Erforderliche Rolle (z.B. "ADMIN").
  */
 const ProtectedRoute = ({ children, requiredRole }) => {
     const { isAuthenticated, user, isLoading } = useAuth();
 
-    // 1. Warten, bis der Auth-Check fertig ist
+    // 1. Warten, bis der Auth-Status (Token-Check) initialisiert ist
     if (isLoading) {
         return (
             <div style={{ textAlign: "center", marginTop: "50px" }}>
@@ -20,19 +21,19 @@ const ProtectedRoute = ({ children, requiredRole }) => {
         );
     }
 
-    // 2. Check: Ist der User überhaupt eingeloggt?
+    // 2. Check: Ist der User eingeloggt?
     if (!isAuthenticated) {
-        // Wenn nicht -> Redirect zum Login
+        // Redirect zum Login
         return <Navigate to="/login" replace />;
     }
 
-    // 3. Check: Hat der User die nötige Rolle? (Nur wenn requiredRole gesetzt ist)
+    // 3. Check: Hat der User die nötige Rolle?
     if (requiredRole && user?.role !== requiredRole) {
-        // Wenn falsche Rolle -> Redirect zur Forbidden Page
+        // Redirect zur Forbidden Page bei fehlenden Rechten
         return <Navigate to="/forbidden" replace />;
     }
 
-    // 4. Alles ok -> Seite anzeigen
+    // 4. Zugriff gewährt
     return children;
 };
 

@@ -1,23 +1,24 @@
 import { useEffect, useState } from "react";
-// Services importieren
+// Importiert CRUD-Services.
 import { getAllMovies, createMovie, updateMovie, deleteMovie } from "../services/movie-service";
 import MovieForm from "../components/MovieForm";
 
 /**
  * Admin Dashboard zur Verwaltung von Filmen.
- * * Quelle: Block 04A/B - QuestionManager Analogie
- * Wir laden die Liste beim Start und verwalten den lokalen State fuer
- * optimistische UI-Updates (Liste aktualisieren ohne Reload).
+ * Quelle: Block 04B - Admin Features
+ * Funktionen:
+ * - Auflistung aller Filme (Admin-Sicht).
+ * - Erstellen neuer Filme.
+ * - Bearbeiten und Löschen existierender Filme.
  */
 const MovieManager = () => {
     const [movies, setMovies] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // State fuer den Film, der gerade bearbeitet wird (null = Create Modus)
+    // State für den Film, der gerade bearbeitet wird (null = Create Modus).
     const [editingMovie, setEditingMovie] = useState(null);
 
-    // Quelle: React Hooks - Daten laden beim Mounten
     useEffect(() => {
         loadMovies();
     }, []);
@@ -35,14 +36,15 @@ const MovieManager = () => {
     };
 
     /**
-     * Zentraler Handler fuer Formular-Submit (Create UND Update)
-     * Quelle: Block 04A - Integration Backend
+     * Zentraler Handler für Formular-Submit (Create UND Update).
+     * Unterscheidet anhand von 'editingMovie', welche Aktion ausgeführt wird.
      */
     const handleFormSubmit = async (movieData) => {
         try {
             if (editingMovie) {
                 // --- UPDATE FALL ---
                 const updated = await updateMovie(editingMovie.id, movieData);
+                // Optimistisches Update der Liste:
                 setMovies(movies.map(m => m.id === editingMovie.id ? updated : m));
                 setEditingMovie(null);
                 alert("Film erfolgreich aktualisiert!");
@@ -73,6 +75,7 @@ const MovieManager = () => {
         try {
             await deleteMovie(id);
             setMovies(movies.filter(m => m.id !== id));
+            // Falls der zu löschende Film gerade bearbeitet wird, Formular resetten.
             if (editingMovie?.id === id) {
                 setEditingMovie(null);
             }
@@ -94,6 +97,7 @@ const MovieManager = () => {
                 </div>
             )}
 
+            {/* Formular für Create/Edit */}
             <MovieForm
                 key={editingMovie ? editingMovie.id : 'create'}
                 onSubmit={handleFormSubmit}
@@ -107,38 +111,27 @@ const MovieManager = () => {
 
             <div style={{ display: "grid", gap: "1rem" }}>
                 {movies.map(movie => (
-                    // ! ANPASSUNG: Dark Mode (className="card")
+                    // Einfachere Kartenansicht für Admins
                     <div key={movie.id} className="card" style={{
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center"
                     }}>
                         <div style={{ flex: 1 }}>
-                            {/* Titel */}
                             <div style={{ fontSize: "1.1rem", fontWeight: "bold" }}>
                                 {movie.title} <span style={{ color: "#aaa", fontWeight: "normal" }}>({movie.releaseYear})</span>
                             </div>
-
-                            {/* Metadata (Regie, Genre) */}
                             <div style={{ fontSize: "0.9rem", color: "#aaa", marginTop: "0.25rem" }}>
                                 Regie: {movie.director} | Genre: {movie.genre}
                             </div>
-
-                            {/* --- NEU: Entflochtene Bewertung (Jury vs. Publikum) --- */}
                             <div style={{ display: "flex", gap: "15px", marginTop: "8px", fontSize: "0.9rem" }}>
-
-                                {/* 1. Jury Wert */}
                                 <span style={{ color: "#888" }}>
-                                   ⚖️ Jury-Rating: <strong>{movie.rating}</strong>
+                                   Jury: <strong>{movie.rating}</strong>
                                 </span>
-
-                                {/* 2. Community Wert */}
                                 <span style={{ color: "#FFD700", fontWeight: "bold" }}>
-                                   ★ Publikum: {movie.averageRating ? movie.averageRating.toFixed(1) : "-"}
+                                   ★ Presse: {movie.averageRating ? movie.averageRating.toFixed(1) : "-"}
                                 </span>
-
                             </div>
-                            {/* ------------------------------------------------------- */}
                         </div>
 
                         <div style={{ display: "flex", gap: "10px" }}>

@@ -1,12 +1,13 @@
 :root {
-    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
     font-weight: 400;
 
     /* DARK MODE VARIABLEN */
+    /* Quelle: Projektscope - Modernes UI Design */
     color-scheme: dark;
     color: rgba(255, 255, 255, 0.87);
-    background-color: #242424; /* Dunkler Hintergrund */
+    background-color: #242424;
 
     font-synthesis: none;
     text-rendering: optimizeLegibility;
@@ -19,22 +20,37 @@ body {
     padding: 0;
     min-width: 320px;
     min-height: 100vh;
-    background-color: #242424; /* Dunkel bleiben! */
+    background-color: #242424;
 }
 
 #root {
     width: 100%;
-    max-width: 1280px;
+    /* Zentrierung der App auf grossen Bildschirmen */
     margin: 0 auto;
-    padding: 2rem;
 }
 
+/* Typografie */
 h1, h2, h3 {
-    color: #ffffff; /* Weisse Überschriften */
+    color: #ffffff;
+    line-height: 1.1;
 }
 
-/* --- NEU: Karten-Design (Dark Mode) --- */
-/* Das ersetzt die Inline-Styles "background: white" */
+h1 { font-size: 2.2em; }
+h2 { font-size: 1.5em; }
+
+/* Links */
+a {
+    color: #646cff;
+    text-decoration: inherit;
+    transition: 0.25s;
+}
+a:hover {
+    color: #535bf2;
+}
+
+/* --- UI KOMPONENTEN --- */
+
+/* Karten-Design für Filme (Dark Mode) */
 .card {
     background-color: #1a1a1a;
     border: 1px solid #333;
@@ -42,9 +58,36 @@ h1, h2, h3 {
     padding: 1.5rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     color: #eee;
+    transition: transform 0.2s;
 }
 
-/* --- Formulare & Inputs (Dark Mode) --- */
+/* Page Container (Zentrierung) */
+.page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Auth Container (Login Box) */
+.auth-container {
+    background-color: #1a1a1a;
+    padding: 2rem;
+    border-radius: 8px;
+    border: 1px solid #333;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    max-width: 400px;
+    width: 100%;
+    margin: 0 auto; /* Zentriert die Box */
+}
+
+.auth-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+}
+
+/* Formulare & Inputs */
 .form-input {
     box-sizing: border-box;
     width: 100%;
@@ -52,9 +95,10 @@ h1, h2, h3 {
     border: 1px solid #444;
     border-radius: 4px;
     font-size: 1rem;
-    background-color: #333; /* Dunkle Eingabefelder */
+    background-color: #333; /* Dunkler Hintergrund für Inputs */
     color: white;
     transition: border-color 0.25s;
+    font-family: inherit;
 }
 
 .form-input:focus {
@@ -62,21 +106,15 @@ h1, h2, h3 {
     border-color: #646cff;
 }
 
-/* Auth Container (Login Box) */
-.auth-container {
-    background-color: #1a1a1a; /* Dunkel */
-    padding: 2rem;
-    border-radius: 8px;
-    border: 1px solid #333;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-    max-width: 400px;
-    width: 100%;
+.form-input--error {
+    border-color: #ff6b6b;
 }
 
-/* Page Container */
-.page-container {
-    max-width: 1200px;
-    margin: 0 auto;
+.error-message {
+    color: #ff6b6b;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
 }
 
 /* Buttons */
@@ -92,14 +130,18 @@ button {
     cursor: pointer;
     transition: border-color 0.25s;
 }
+
 button:hover {
     border-color: #646cff;
     background-color: #444;
 }
 
-.error-message {
-    color: #ff6b6b; /* Helleres Rot für Dark Mode */
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-    display: block;
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+button:focus,
+button:focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
 }

@@ -1,19 +1,25 @@
 import { useState } from "react";
 
 /**
- * Login Formular Komponente
- * - Kümmert sich nur um UI und Eingabe-Validierung
- * - Ruft bei Erfolg die onLogin-Funktion auf
+ * Formular-Komponente für den Login.
+ * Verantwortlichkeiten:
+ * - UI-Darstellung der Eingabefelder.
+ * - Lokale Validierung vor dem Absenden (Client-Side Validation).
+ * - Weitergabe der Daten an die Eltern-Komponente via Callback.
+ * Quelle: Block 03B - Formulare & Validierung
  */
 const LoginForm = ({ onLogin, isLoading }) => {
-    // State für die Eingabefelder
+    // Lokaler State für Formularfelder
     const [usernameOrEmail, setUsernameOrEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    // State für Validierungs-Fehler
+    // State für Validierungsfehler
     const [errors, setErrors] = useState({});
 
-    // Validierungs-Logik
+    /**
+     * Prüft die Eingaben auf Gültigkeit.
+     * @returns {boolean} true, wenn keine Fehler vorliegen.
+     */
     const validate = () => {
         const newErrors = {};
 
@@ -30,25 +36,24 @@ const LoginForm = ({ onLogin, isLoading }) => {
         }
 
         setErrors(newErrors);
-        // Das Formular ist valide, wenn das Error-Objekt leer ist
         return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // 1. Validieren
+        // 1. Validierung ausführen
         if (!validate()) {
             return;
         }
 
-        // 2. Daten an die Eltern-Komponente (Login.jsx) weitergeben
+        // 2. Daten an die Eltern-Komponente (Login Page) übergeben
         onLogin(usernameOrEmail, password);
     };
 
     return (
         <form onSubmit={handleSubmit} className="auth-form">
-            {/* Username / Email Feld */}
+            {/* Feld: Benutzername / E-Mail */}
             <div style={{ marginBottom: "1rem" }}>
                 <label
                     htmlFor="username"
@@ -68,7 +73,7 @@ const LoginForm = ({ onLogin, isLoading }) => {
                 {errors.username && <span className="error-message">{errors.username}</span>}
             </div>
 
-            {/* Passwort Feld */}
+            {/* Feld: Passwort */}
             <div style={{ marginBottom: "1.5rem" }}>
                 <label
                     htmlFor="password"

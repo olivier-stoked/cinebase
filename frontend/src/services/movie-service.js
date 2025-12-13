@@ -1,8 +1,9 @@
 import apiClient from "./api-client";
 
-// Quelle: Block 04A - Axios Interceptor
-// Wir nutzen den zentralen apiClient, damit der Token automatisch mitgeschickt wird.
-
+/**
+ * Lädt alle Filme vom Backend.
+ * @returns {Promise<Array>} Liste von MovieDTOs.
+ */
 export const getAllMovies = async () => {
     try {
         const response = await apiClient.get("/movies");
@@ -13,8 +14,10 @@ export const getAllMovies = async () => {
     }
 };
 
-// Quelle: Block 04B - CRUD Operations
-// Wir benötigen diese Methode, um die Details für das Bearbeiten zu laden (optional)
+/**
+ * Lädt einen einzelnen Film anhand der ID.
+ * @param {number} id - Die ID des Films.
+ */
 export const getMovieById = async (id) => {
     try {
         const response = await apiClient.get(`/movies/${id}`);
@@ -25,6 +28,10 @@ export const getMovieById = async (id) => {
     }
 };
 
+/**
+ * Erstellt einen neuen Film (nur für ADMIN).
+ * @param {Object} movieData - Das MovieDTO.
+ */
 export const createMovie = async (movieData) => {
     try {
         const response = await apiClient.post("/movies", movieData);
@@ -35,9 +42,11 @@ export const createMovie = async (movieData) => {
     }
 };
 
-// Quelle: Block 04B - CRUD Operations (Update)
-// Wir nutzen PUT fuer Updates, da wir die gesamte Ressource aktualisieren.
-// Die ID wird in der URL uebergeben, die Daten im Body.
+/**
+ * Aktualisiert einen bestehenden Film (nur für ADMIN).
+ * @param {number} id - Die ID des Films.
+ * @param {Object} movieData - Die aktualisierten Daten.
+ */
 export const updateMovie = async (id, movieData) => {
     try {
         const response = await apiClient.put(`/movies/${id}`, movieData);
@@ -48,6 +57,10 @@ export const updateMovie = async (id, movieData) => {
     }
 };
 
+/**
+ * Löscht einen Film (nur für ADMIN).
+ * @param {number} id - Die ID des Films.
+ */
 export const deleteMovie = async (id) => {
     try {
         await apiClient.delete(`/movies/${id}`);

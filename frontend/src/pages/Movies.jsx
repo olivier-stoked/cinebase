@@ -1,12 +1,20 @@
 import { useEffect, useState } from "react";
+// Importiert den Service für Film-Daten.
 import { getAllMovies } from "../services/movie-service";
+// Importiert die Darstellungskomponente für einen einzelnen Film.
 import MovieCard from "../components/MovieCard";
 
+/**
+ * Seite zur Anzeige des Filmkatalogs.
+ * Lädt alle Filme vom Backend und stellt sie als Gitter (Grid) dar.
+ * Quelle: Block 04A - Daten laden & Anzeigen
+ */
 const Movies = () => {
     const [movies, setMovies] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // Laden der Daten beim Mounten der Komponente.
     useEffect(() => {
         loadMovies();
     }, []);
@@ -16,12 +24,9 @@ const Movies = () => {
             const data = await getAllMovies();
             setMovies(data);
         } catch (err) {
-            // WICHTIG: Fehler in die Konsole loggen!
-            // 1. Löst das Linter-Problem (Variable 'err' wird benutzt)
-            // 2. Hilft uns zu sehen, WARUM es nicht klappt (z.B. 401, 500, Network Error)
+            // ! WICHTIG: Fehler in die Konsole loggen für Debugging (401, 500 etc.)
             console.error("Fehler beim Laden der Filme:", err);
-
-            setError("Konnte Filme nicht laden. Bist du eingeloggt?");
+            setError("Konnte Filme nicht laden. Möglicherweise sind Sie nicht eingeloggt.");
         } finally {
             setIsLoading(false);
         }
@@ -29,7 +34,7 @@ const Movies = () => {
 
     if (isLoading) return <div style={{ textAlign: "center", marginTop: "50px" }}>Lade Filme...</div>;
 
-    if (error) return <div className="error-message" style={{ textAlign: "center", marginTop: "50px" }}>{error}</div>;
+    if (error) return <div className="error-message" style={{ textAlign: "center", marginTop: "50px", color: "red" }}>{error}</div>;
 
     return (
         <div className="page-container">
@@ -37,7 +42,7 @@ const Movies = () => {
 
             <div style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))", // Responsive Grid
                 gap: "2rem"
             }}>
                 {movies.map((movie) => (

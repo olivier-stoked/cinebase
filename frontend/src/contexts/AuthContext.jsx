@@ -1,24 +1,33 @@
 import { createContext, useContext, useState, useEffect } from "react";
+// Importiert die API-Funktionen für Authentifizierung.
 import {
     login as apiLogin,
     logout as apiLogout,
     getUserData,
 } from "../services/auth-service";
 
-// 1. Context erstellen
+// 1. Erstellung des Context-Objekts.
+// Dient als Container für den globalen Auth-Status.
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext();
 
-// Globaler Status: user und isauthenticated is überall in der App verfügbar.
-// Provider Component
+/**
+ * Provider-Komponente für das Authentifizierungs-Management.
+ * Kapselt die Logik für Login, Logout und Session-Persistenz.
+ * Quelle: Block 03A - AuthContext & Global State
+ */
 export const AuthProvider = ({ children }) => {
+    // Globaler State für den aktuellen Benutzer und Token.
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [isLoading, setIsLoading] = useState(true); // Wichtig: Startet als true!
+    // Initialer Ladezustand ist 'true', um die Prüfung beim App-Start abzuwarten.
+    const [isLoading, setIsLoading] = useState(true);
 
-    // Beim Laden der Seite: Prüfen, ob wir noch eingeloggt sind
-    // ! useEffect sorgt dafür, dass der user beim Neuladen der Seite eingeloggt bleibt
+    /**
+     * Effekt zur Wiederherstellung der Sitzung beim Laden der Seite (z.B. F5 Refresh).
+     * Prüft, ob gültige Anmeldedaten im LocalStorage vorhanden sind.
+     */
     useEffect(() => {
         const checkAuth = () => {
             console.log("Prüfe Auth-Status...");
@@ -26,14 +35,17 @@ export const AuthProvider = ({ children }) => {
             const storedToken = localStorage.getItem("authToken");
 
             if (storedUser && storedToken) {
-                console.log("User wiederhergestellt:", storedUser.username);
+                console.log("Benutzersitzung wiederhergestellt:", storedUser.username);
                 setUser(storedUser);
                 setToken(storedToken);
                 setIsAuthenticated(true);
             } else {
-                console.log("Kein User gefunden");
+                console.log("Keine aktive Sitzung gefunden.");
                 setIsAuthenticated(false);
+                setUser(null);
+                setToken(null);
             }
+            // Beendet den Ladezustand, sobald die Prüfung abgeschlossen ist.
             setIsLoading(false);
         };
 
@@ -41,25 +53,23 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     /**
-     * Login-Funktion
-     * @param {string} usernameOrEmail - Username oder Email
-     * @param {string} password - Passwort
+     * Führt den Login-Prozess durch.
+     * Ruft den API-Service auf und aktualisiert den globalen State.
+     * @param {string} usernameOrEmail - Benutzername oder E-Mail.
+     * @param {string} password - Das Passwort.
+     * @returns {Promise<Object>} Die Antwort des Backends.
      */
     const login = async (usernameOrEmail, password) => {
-        // Wir brauchen kein try/catch, da der Fehler automatisch and die Komponente (LoginForm) weitergeleitet wird
-        // wenn, wenn apiLogin fehlschlägt
+        // Fehlerbehandlung erfolgt in der aufrufenden Komponente (LoginForm).
+        console.log("AuthContext: Login-Versuch für", usernameOrEmail);
 
-        console.log("📧 AuthContext: Login für", usernameOrEmail);
-
-        // API Call
+        // API-Aufruf an das Backend
         const response = await apiLogin(usernameOrEmail, password);
 
-        // Wenn wir hier ankommen, war der Login erfolgreich (sonst hätte apiLogin einen Fehler geworfen)
-
-        // State aktualisieren
+        // State aktualisieren mit Daten aus dem LoginResponseDTO
         setToken(response.token);
         setUser({
-            // Achtung: Backend sendet 'userId', nicht 'id' im DTO
+            // WICHTIG: Das Backend sendet 'userId' im DTO, im Frontend nutzen wir 'id'.
             id: response.userId,
             username: response.username,
             email: response.email,
@@ -71,15 +81,20 @@ export const AuthProvider = ({ children }) => {
         return response;
     };
 
-    // Logout-Funktion
+    /**
+     * Meldet den Benutzer ab.
+     * Bereinigt den lokalen Speicher, setzt den State zurück und erzwingt einen Reload.
+     */
     const logout = () => {
         apiLogout();
         setUser(null);
         setToken(null);
         setIsAuthenticated(false);
+        // Hard Redirect zur Startseite, um den App-Zustand vollständig zurückzusetzen.
         window.location.href = "/";
     };
 
+    // Das Value-Objekt, das allen Konsumenten zur Verfügung gestellt wird.
     const value = {
         user,
         token,
@@ -89,16 +104,13 @@ export const AuthProvider = ({ children }) => {
         logout,
     };
 
-    // ! if (isLoading)... Ladeschutz - BESSER ERKLÄREN:
-    // Warten, bis der Auth-Check fertig ist, bevor wir die App anzeigen.
-    // Erklärung: Beim Neuladen der Seite (F5) ist 'isAuthenticated' kurzzeitig 'false',
-    // bis der useEffect oben den User aus dem LocalStorage geladen hat.
-    // Ohne diesen Schutz würde die App kurz die Login-Seite zeigen (Flackern),
-    // obwohl der User eigentlich eingeloggt ist.
+    // Ladeschutz (Flash of Unauthenticated Content Prevention):
+    // Verhindert, dass kurzzeitig die Login-Seite angezeigt wird, während
+    // der useEffect noch prüft, ob der User eigentlich eingeloggt ist.
     if (isLoading) {
         return (
-            <div style={{ textAlign: "center", marginTop: "50px" }}>
-                Lade CINEBASE...
+            <div style={{ textAlign: "center", marginTop: "50px", fontFamily: "sans-serif" }}>
+                <h3>Lade CINEBASE...</h3>
             </div>
         );
     }
@@ -106,7 +118,7 @@ export const AuthProvider = ({ children }) => {
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Custom Hook
+// Custom Hook für den einfacheren Zugriff auf den Context in Komponenten.
 // eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
     const context = useContext(AuthContext);

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-// Standard-Werte ausserhalb der Komponente definiert, um Re-Renders zu vermeiden.
+// Standard-Werte für ein neues Film-Objekt.
 const DEFAULT_DATA = {
     title: "",
     description: "",
@@ -12,18 +12,21 @@ const DEFAULT_DATA = {
 
 /**
  * Formular zum Erstellen und Bearbeiten von Filmen.
- * * Quelle: Block 03B - Form Validation Basics
- * Wir nutzen lokalen State fuer die Formulardaten und Errors.
- * * @param {Function} onSubmit - Wird aufgerufen, wenn das Formular valide ist
- * @param {Object} initialData - Daten zum Bearbeiten (oder null fuer Neu)
- * @param {Function} onCancel - Callback fuer Abbrechen-Button
+ *
+ * Quelle: Block 03B - Formularverarbeitung
+ * Verwendung: Wird im AdminDashboard genutzt (für Create & Update).
+ *
+ * @param {Function} onSubmit - Handler für valides Formular.
+ * @param {Object} initialData - Vorhandene Daten (bei Edit) oder null (bei Create).
+ * @param {Function} onCancel - Handler für Abbrechen.
  */
 const MovieForm = ({ onSubmit, initialData, onCancel }) => {
 
-    // Quelle: React Basics - State Initialisierung
+    // Initialisierung des States mit vorhandenen Daten oder Defaults.
     const [formData, setFormData] = useState(initialData || DEFAULT_DATA);
     const [errors, setErrors] = useState({});
 
+    // Handler für Änderungen in den Input-Feldern.
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -32,7 +35,8 @@ const MovieForm = ({ onSubmit, initialData, onCancel }) => {
         }));
     };
 
-    // Quelle: Block 03B - Validation Logic
+    // Validierungs-Logik (Client-Side).
+    // Quelle: Block 06A - Frontend Validation
     const validate = () => {
         const newErrors = {};
         if (!formData.title.trim()) newErrors.title = "Titel ist erforderlich";
@@ -98,7 +102,7 @@ const MovieForm = ({ onSubmit, initialData, onCancel }) => {
                     </div>
                 </div>
 
-                {/* Jahr & Rating (Jury Score) */}
+                {/* Jahr & Rating */}
                 <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
                     <div style={{ flex: 1 }}>
                         <label>Jahr *</label>
@@ -113,7 +117,7 @@ const MovieForm = ({ onSubmit, initialData, onCancel }) => {
                         {errors.releaseYear && <span className="error-message">{errors.releaseYear}</span>}
                     </div>
 
-                    {/* --- ANPASSUNG: Jury Label & Hinweis --- */}
+                    {/* Anpassung: Klartext-Label für Jury-Wertung */}
                     <div style={{ flex: 1 }}>
                         <label>Jury-Wertung (Festival-Leitung) *</label>
                         <input
@@ -147,13 +151,12 @@ const MovieForm = ({ onSubmit, initialData, onCancel }) => {
                     />
                 </div>
 
-                {/* Buttons */}
+                {/* Action Buttons */}
                 <div style={{ display: "flex", gap: "10px" }}>
                     <button type="submit" style={{ flex: 1 }}>
                         {initialData ? "Änderungen speichern" : "Film speichern"}
                     </button>
 
-                    {/* Abbrechen Button nur anzeigen wenn wir editieren */}
                     {initialData && (
                         <button
                             type="button"

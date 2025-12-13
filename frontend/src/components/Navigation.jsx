@@ -1,6 +1,11 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
+/**
+ * Globale Navigationsleiste.
+ * Zeigt Links basierend auf dem Anmeldestatus und der Rolle an.
+ * Quelle: Block 04B - Navigation & Conditional Rendering
+ */
 const Navigation = () => {
     const { isAuthenticated, user, logout } = useAuth();
 
@@ -13,13 +18,13 @@ const Navigation = () => {
             alignItems: "center",
             marginBottom: "2rem"
         }}>
-            {/* Links */}
+            {/* Linke Seite: Hauptnavigation */}
             <div style={{ display: "flex", gap: "20px" }}>
                 <Link to="/" style={{ color: "white", textDecoration: "none", fontWeight: "bold" }}>CINEBASE</Link>
                 <Link to="/" style={{ color: "#ccc", textDecoration: "none" }}>Home</Link>
                 <Link to="/movies">Filme</Link>
 
-                {/* Admin Link nur fuer ADMIN Rolle anzeigen */}
+                {/* Admin Link nur für die Rolle ADMIN sichtbar */}
                 {user?.role === "ADMIN" && (
                     <Link to="/admin" style={{ color: "#ff4444", textDecoration: "none" }}>Admin</Link>
                 )}
@@ -29,12 +34,12 @@ const Navigation = () => {
                 )}
             </div>
 
-            {/* Rechts: User Info & Logout */}
+            {/* Rechte Seite: User Info & Logout */}
             {isAuthenticated && (
                 <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
-          <span style={{ color: "#888", fontSize: "0.9rem" }}>
-            Hallo, {user?.username}
-          </span>
+                    <span style={{ color: "#888", fontSize: "0.9rem" }}>
+                        Hallo, {user?.username}
+                    </span>
                     <button
                         onClick={logout}
                         style={{

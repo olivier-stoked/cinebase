@@ -1,29 +1,36 @@
 import { useState, useEffect } from "react";
 import ReviewForm from "./ReviewForm";
-// WICHTIG: Hier 'getReviewsByMovie' neu importiert
+// Import der Review-Services für Interaktionen
 import { addReview, getAverageRating, getReviewsByMovie } from "../services/review-service";
-// ! NEU: Auth Hook importieren, um die Rolle zu prüfen (damit Admins nicht bewerten können)
+// Import des Auth-Hooks zur Rollenprüfung
 import { useAuth } from "../contexts/AuthContext";
 
 /**
- * Komponente zur Anzeige einer einzelnen Filmkarte.
- * Enthält jetzt auch die Logik zum Anzeigen des Durchschnitts und zum Bewerten.
+ * Komponente zur Anzeige einer einzelnen Filmkarte im Katalog.
+ * Beinhaltet komplexe Logik für:
+ * - Anzeige der Sterne-Bewertung (SVG).
+ * - Laden und Anzeigen des Durchschnitts-Ratings.
+ * - Einblenden des Bewertungsformulars (ReviewForm).
+ * - Laden und Anzeigen der Kommentare.
+ * Quelle: Block 06A - Komponenten-Logik & API-Integration
  */
 const MovieCard = ({ movie }) => {
-    // ! NEU: Zugriff auf User-Rolle
+    // Zugriff auf den aktuellen User für Berechtigungs-Logik (Admin darf nicht bewerten).
     const { user } = useAuth();
 
-    // ! FIX: Wir nutzen den Wert vom Backend als Startwert, falls vorhanden!
+    // Initialisierung mit dem Wert vom Backend, falls vorhanden, sonst 0.
     const [averageRating, setAverageRating] = useState(movie.averageRating || 0);
 
+    // UI-States für Interaktivität
     const [showReviewForm, setShowReviewForm] = useState(false);
-
-    // --- NEUE STATE VARIABLEN ---
     const [reviews, setReviews] = useState([]);
     const [showComments, setShowComments] = useState(false);
     const [isLoadingReviews, setIsLoadingReviews] = useState(false);
 
-    // --- 1. Funktion ZUERST definieren ---
+    /**
+     * Lädt den aktuellen Durchschnittswert vom Backend nach.
+     * Wird nach einer neuen Bewertung aufgerufen, um die Anzeige zu aktualisieren.
+     */
     const loadAverage = async () => {
         try {
             const avg = await getAverageRating(movie.id);
@@ -33,7 +40,9 @@ const MovieCard = ({ movie }) => {
         }
     };
 
-    // --- Kommentare laden ---
+    /**
+     * Lädt die Kommentare bei Bedarf (Lazy Loading), um Traffic zu sparen.
+     */
     const toggleComments = async () => {
         if (!showComments) {
             setIsLoadingReviews(true);
@@ -49,21 +58,24 @@ const MovieCard = ({ movie }) => {
         setShowComments(!showComments);
     };
 
-    // --- SVG Sterne ---
-    // Quelle: MDN Web Docs - SVG Gradients
-    // ! Konkret ausformulieren, was hier passiert
+    /**
+     * Generiert die Sterne-Grafik basierend auf dem Rating.
+     * Logik: Skala 0-10 wird auf 5 Sterne gemappt (Halbsterne möglich).
+     * Quelle: Angepasst von MDN Web Docs (SVG Gradients).
+     */
     const renderStars = (rating) => {
         if (rating === undefined || rating === null) return <span style={{ color: "#aaa" }}>-</span>;
 
         const stars = [];
         for (let i = 1; i <= 5; i++) {
             let fill = "none";
+            // Logik: Ein Stern entspricht 2 Punkten
             if (rating >= i * 2) {
-                fill = "100%";
+                fill = "100%"; // Voller Stern
             } else if (rating >= (i * 2) - 1) {
-                fill = "50%";
+                fill = "50%";  // Halber Stern
             } else {
-                fill = "0%";
+                fill = "0%";   // Leerer Stern
             }
 
             stars.push(
@@ -84,7 +96,7 @@ const MovieCard = ({ movie }) => {
         return <div style={{ display: "flex", alignItems: "center" }}>{stars}</div>;
     };
 
-    // --- 2. DANN useEffect aufrufen ---
+    // Aktualisiert das Rating, wenn sich die Movie-Prop ändert (z.B. beim Filtern).
     useEffect(() => {
         if (movie.averageRating !== undefined && movie.averageRating !== null) {
             setAverageRating(movie.averageRating);
@@ -95,12 +107,14 @@ const MovieCard = ({ movie }) => {
     }, [movie.id, movie.averageRating]);
 
     /**
-     * Wird aufgerufen, wenn das ReviewForm abgesendet wird.
+     * Verarbeitet das Absenden einer neuen Bewertung.
+     * Aktualisiert danach den Durchschnitt und die Kommentarliste.
      */
     const handleReviewSubmit = async (reviewData) => {
         try {
             await addReview(reviewData);
-            await loadAverage();
+            await loadAverage(); // Durchschnitt neu laden
+            // Wenn Kommentare offen sind, diese auch neu laden
             if (showComments) {
                 const loadedReviews = await getReviewsByMovie(movie.id);
                 setReviews(loadedReviews);
@@ -109,12 +123,11 @@ const MovieCard = ({ movie }) => {
             alert("Vielen Dank für Ihre Bewertung!");
         } catch (error) {
             console.error("Fehler im Submit-Prozess:", error);
-            throw error;
+            throw error; // Fehler an Formular weitergeben
         }
     };
 
     return (
-        // ! ANPASSUNG: className="card" für Dark Mode
         <div className="card" style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
@@ -123,10 +136,10 @@ const MovieCard = ({ movie }) => {
                         {movie.title}
                     </h3>
 
-                    {/* --- NEU: Entflochtene Anzeige (Community vs. Jury) --- */}
+                    {/* Anzeige: Community-Wertung vs. Jury-Wertung */}
                     <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
 
-                        {/* 1. Community Sterne */}
+                        {/* 1. Community Sterne (Live berechnet) */}
                         <div style={{ display: "flex", alignItems: "center" }}>
                             {renderStars(averageRating)}
                             <span style={{ fontSize: "0.9rem", color: "#FFD700", marginLeft: "5px", fontWeight: "bold" }}>
@@ -136,7 +149,7 @@ const MovieCard = ({ movie }) => {
 
                         <span style={{ color: "#444" }}>|</span>
 
-                        {/* 2. Jury Referenz */}
+                        {/* 2. Jury Referenz (Statischer Wert aus DB) */}
                         <span style={{ fontSize: "0.8rem", color: "#888", fontStyle: "italic" }}>
                             Jury: {movie.rating}
                         </span>
@@ -152,10 +165,10 @@ const MovieCard = ({ movie }) => {
                 {movie.description}
             </p>
 
-            {/* Buttons Container */}
+            {/* Buttons für Aktionen */}
             <div style={{ display: "flex", gap: "10px", marginTop: "1rem", flexWrap: "wrap" }}>
 
-                {/* ! LOGIK: Admin darf NICHT bewerten (Jury entscheidet beim Anlegen) */}
+                {/* Logik: Admins dürfen keine User-Reviews verfassen (Trennung der Rollen) */}
                 {!showReviewForm && user && user.role !== 'ADMIN' && (
                     <button
                         onClick={() => setShowReviewForm(true)}
@@ -184,7 +197,7 @@ const MovieCard = ({ movie }) => {
                 </button>
             </div>
 
-            {/* Das Bewertungsformular */}
+            {/* Bedingtes Rendern des Formulars */}
             {showReviewForm && (
                 <ReviewForm
                     movieId={movie.id}
@@ -193,7 +206,7 @@ const MovieCard = ({ movie }) => {
                 />
             )}
 
-            {/* Kommentar-Liste */}
+            {/* Bedingtes Rendern der Kommentarliste */}
             {showComments && (
                 <div style={{ marginTop: "1rem", borderTop: "1px solid #444", paddingTop: "1rem" }}>
                     <h4 style={{ margin: "0 0 10px 0", fontSize: "1rem" }}>Nutzer-Meinungen:</h4>
